@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PP sim and cal Test</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- Global Variables --- */
+    :root {
+      --primary-blue: #003366;
+      --dark-footer: #161F2B;
+      --accent-yellow: #f5c242;
+      --light-yellow: #fceeb5; /* สีพื้นหลัง Sidebar */
+      --active-orange: #fdd835; /* สีปุ่ม Active */
+      --text-grey: #666;
+      --border-dashed: rgba(255, 255, 255, 0.3);
+      --gray-bg: #f9f9f9;
+    }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fafafa; /* ปรับพื้นหลัง Body ให้อ่อนลงนิดหน่อยเพื่อให้ Content เด่น */
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* --- 1. Header (คงเดิม) --- */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border-bottom: 1px solid #eee;
+    }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .logos { display: flex; gap: 10px; align-items: center; }
+    .logos img { height: 50px; width: auto; }
+    .brand-text { border-left: 1px solid #ddd; padding-left: 15px; }
+    .brand-text h1 { font-size: 1.2rem; font-weight: 700; color: var(--primary-blue); margin: 0; }
+    .brand-text p { font-size: 0.8rem; color: var(--text-grey); margin: 0; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .nav-link { text-decoration: none; color: var(--text-grey); font-size: 0.95rem; }
+    .lang-switch { border: 1px solid var(--primary-blue); border-radius: 20px; padding: 4px 15px; color: var(--primary-blue); font-size: 0.9rem; cursor: pointer; }
+    .hamburger { font-size: 1.5rem; color: var(--primary-blue); cursor: pointer; }
+
+    /* --- 2. Hero Section (คงเดิม) --- */
+    .hero {
+      text-align: center;
+      padding: 40px 20px 30px 20px; /* ลด Padding ล่างลงเพื่อให้เข้ากับส่วนคำนวณ */
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .hero h2 { font-size: 2.2rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; }
+    .hero p.subtitle { font-size: 1rem; color: var(--text-grey); margin-bottom: 20px; line-height: 1.6; }
+
+    /* --- 3. App Container (ส่วนใหม่: พื้นที่คำนวณ) --- */
+    .app-container {
+      display: flex;
+      max-width: 1100px;
+      width: 95%;
+      margin: 0 auto 60px auto; /* จัดกึ่งกลางและเว้นระยะ Footer */
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      border: 1px solid #eee;
+      overflow: hidden;
+      min-height: 600px; /* ความสูงขั้นต่ำ */
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background-color: var(--light-yellow);
+      padding: 20px;
+      border-right: 1px solid #eee;
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      display: block;
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.6);
+      border: 2px solid white;
+      border-radius: 12px;
+      font-size: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #555;
+      font-weight: 600;
+      box-sizing: border-box;
+    }
+    .nav-btn:hover { background: white; }
+    .nav-btn.active {
+      background: white;
+      color: var(--primary-blue);
+      border-color: var(--active-orange);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      padding: 40px;
+      background-color: white;
+    }
+    .page-section {
+      display: none; /* ซ่อนไว้ก่อน */
+      animation: fadeIn 0.3s;
+    }
+    .page-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    h3.section-title {
+      color: var(--primary-blue);
+      border-bottom: 3px solid var(--light-yellow);
+      padding-bottom: 10px;
+      margin-top: 0;
+      margin-bottom: 30px;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    /* Input Styles */
+    .input-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 15px;
+      background: var(--gray-bg);
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+    label { font-weight: 500; color: #444; }
+    input[type="number"] {
+      width: 120px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: right;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 1rem;
+    }
+    
+    .btn-calc {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.2s;
+      font-family: 'Sarabun', sans-serif;
+    }
+    .btn-calc:hover { background-color: #002244; }
+
+    .result-box {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary-blue);
+      padding: 15px;
+      background-color: #f0f7ff;
+      border-radius: 8px;
+    }
+
+    /* Summary Styles */
+    .sum-list { list-style: none; padding: 0; }
+    .sum-item {
+      display: flex; justify-content: space-between; padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .total-box {
+      margin-top: 20px; padding: 20px;
+      background-color: var(--light-yellow);
+      border: 2px solid var(--active-orange);
+      border-radius: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 1.4rem; font-weight: bold; color: var(--primary-blue);
+    }
+
+    /* --- 4. Footer (คงเดิม) --- */
+    footer {
+      background-color: var(--dark-footer);
+      color: #ffffff;
+      font-family: 'Sarabun', sans-serif;
+      margin-top: auto;
+    }
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+    .f-col-info { flex: 2; padding-right: 40px; }
+    .f-col-info h3 { margin: 5px 0; font-size: 1.1rem; }
+    .f-col-info p { color: #ccc; font-size: 0.9rem; margin-top: 10px; line-height: 1.6; }
+    
+    .f-col-menu {
+      flex: 1;
+      border-left: 1px dashed var(--border-dashed);
+      padding-left: 40px;
+    }
+    .f-col-contact {
+      flex: 1.5;
+      border-left: 1px dashed var(--border-dashed);
+      padding-left: 40px;
+    }
+    
+    .f-title { font-weight: bold; margin-bottom: 20px; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+    .f-links { list-style: none; padding: 0; }
+    .f-links li { margin-bottom: 12px; }
+    .f-links a { color: #dddddd; text-decoration: none; transition: 0.3s; }
+    .f-links a:hover { color: var(--accent-yellow); }
+    
+    .contact-detail p { margin-bottom: 8px; color: #ccc; font-size: 0.9rem; margin-top: 0; }
+    
+    .copyright {
+      background-color: #0f151d;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.8rem;
+      color: #666;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 800px) {
+      .app-container { flex-direction: column; height: auto; }
+      .sidebar { width: 100%; display: flex; overflow-x: auto; padding: 10px; gap: 10px; box-sizing: border-box; }
+      .nav-btn { width: auto; white-space: nowrap; margin-bottom: 0; flex-shrink: 0; }
+      .footer-content { flex-direction: column; gap: 30px; }
+      .f-col-menu, .f-col-contact { border-left: none; padding-left: 0; border-top: 1px dashed var(--border-dashed); padding-top: 20px; }
+      .header-right { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <div class="logos">
+        <img src="image/KMUTNB LOGO.png" alt="KMUTNB">
+        <img src="image/MAE LOGO.png" alt="MAE">
+        <img src="image/WRIC LOGO.png" alt="WIRC">
+      </div>
+      <div class="brand-text">
+        <h1>WIRC-MSW Model</h1>
+        <p>Mathematical Model for MSW in Developing Countries</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <a href="#" class="nav-link">User Manual</a>
+      <div class="lang-switch">TH | EN</div>
+      <div class="hamburger">☰</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h2>การจำลองและคำนวณสมรรถนะโรงไฟฟ้า<br>(Power Plant Performance Simulation and Calculation)</h2>
+    <p class="subtitle">
+    ประเมินประสิทธิภาพการผลิตไฟฟ้าตลอดทั้งกระบวนการ ตั้งแต่การเผาไหม้ในเตา หม้อไอน้ำ จนถึงกำลังไฟฟ้าสุทธิ 
+    </p>
+  </section>
+
+  <div class="app-container">
+    <nav class="sidebar">
+      <div class="nav-btn active" onclick="goToPage(1)">1. ปริมาณอากาศ</div>
+      <div class="nav-btn" onclick="goToPage(2)">2. ปริมาณก๊าซไอเสีย</div>
+      <div class="nav-btn" onclick="goToPage(3)">3. อุณหภูมิเผาไหม้</div>
+      <div class="nav-btn" onclick="goToPage(4)">4. อัตราผลิตไอน้ำ</div>
+      <div class="nav-btn" onclick="goToPage(5)">5. พลังงานไฟฟ้า</div>
+      <div class="nav-btn" onclick="goToPage(6)">6. Boiler</div>
+      <div class="nav-btn" onclick="goToPage(7)">7. Turbine/Gen</div>
+      <div class="nav-btn" onclick="goToPage('sum')" style="margin-top: 10px; border-color: var(--primary-blue); color: var(--primary-blue);">Summary</div>
+    </nav>
+
+    <main class="content-area">
+      
+      <div id="page-1" class="page-section active">
+        <h3 class="section-title">ส่วนที่ 1: ปริมาณอากาศที่ใช้ในการเผาไหม้</h3>
+        <div class="input-group"><label>ค่า A1 (kg/h):</label><input type="number" class="inp-1" placeholder="0"></div>
+        <div class="input-group"><label>ค่า A2 (kg/h):</label><input type="number" class="inp-1" placeholder="0"></div>
+        <button class="btn-calc" onclick="calculate(1)">คำนวณ (Calculate)</button>
+        <div class="result-box">ผลลัพธ์: <span id="res-1">0</span></div>
+      </div>
+
+      <div id="page-2" class="page-section">
+        <h3 class="section-title">ส่วนที่ 2: ปริมาณก๊าซไอเสียที่เกิด</h3>
+        <div class="input-group"><label>ค่า B1:</label><input type="number" class="inp-2" placeholder="0"></div>
+        <div class="input-group"><label>ค่า B2:</label><input type="number" class="inp-2" placeholder="0"></div>
+        <button class="btn-calc" onclick="calculate(2)">คำนวณ (Calculate)</button>
+        <div class="result-box">ผลลัพธ์: <span id="res-2">0</span></div>
+      </div>
+
+      <div id="page-3" class="page-section">
+        <h3 class="section-title">ส่วนที่ 3: อุณหภูมิของกระบวนการเผาไหม้</h3>
+        <div class="input-group"><label>ค่า C1:</label><input type="number" class="inp-3" placeholder="0"></div>
+        <div class="input-group"><label>ค่า C2:</label><input type="number" class="inp-3" placeholder="0"></div>
+        <button class="btn-calc" onclick="calculate(3)">คำนวณ (Calculate)</button>
+        <div class="result-box">ผลลัพธ์: <span id="res-3">0</span></div>
+      </div>
+
+      <div id="page-4" class="page-section">
+        <h3 class="section-title">ส่วนที่ 4: อัตราการผลิตไอน้ำ</h3>
+        <div class="input-group"><label>ค่า D1:</label><input type="number" class="inp-4" placeholder="0"></div>
+        <div class="input-group"><label>ค่า D2:</label><input type="number" class="inp-4" placeholder="0"></div>
+        <button class="btn-calc" onclick="calculate(4)">คำนวณ (Calculate)</button>
+        <div class="result-box">ผลลัพธ์: <span id="res-4">0</span></div>
+      </div>
+
+      <div id="page-5" class="page-section">
+        <h3 class="section-title">ส่วนที่ 5: งานและพลังงานไฟฟ้าที่ผลิตได้</h3>
+        <div class="input-group"><label>ค่า E1:</label><input type="number" class="inp-5" placeholder="0"></div>
+        <div class="input-group"><label>ค่า E2:</label><input type="number" class="inp-5" placeholder="0"></div>
+        <button class="btn-calc" onclick="calculate(5)">คำนวณ (Calculate)</button>
+        <div class="result-box">ผลลัพธ์: <span id="res-5">0</span></div>
+      </div>
+
+      <div id="page-6" class="page-section">
+        <h3 class="section-title">ส่วนที่ 6: Boiler Efficiency</h3>
+        <div class="input-group"><label>ค่า F1:</label><input type="number" class="inp-6" placeholder="0"></div>
+        <div class="input-group"><label>ค่า F2:</label><input type="number" class="inp-6" placeholder="0"></div>
+        <button class="btn-calc" onclick="calculate(6)">คำนวณ (Calculate)</button>
+        <div class="result-box">ผลลัพธ์: <span id="res-6">0</span></div>
+      </div>
+
+       <div id="page-7" class="page-section">
+        <h3 class="section-title">ส่วนที่ 7: Turbine & Generator</h3>
+        <div class="input-group"><label>ค่า G1:</label><input type="number" class="inp-7" placeholder="0"></div>
+        <div class="input-group"><label>ค่า G2:</label><input type="number" class="inp-7" placeholder="0"></div>
+        <button class="btn-calc" onclick="calculate(7)">คำนวณ (Calculate)</button>
+        <div class="result-box">ผลลัพธ์: <span id="res-7">0</span></div>
+      </div>
+
+      <div id="page-sum" class="page-section">
+        <h3 class="section-title">สรุปผลรวม (Summary)</h3>
+        <p style="text-align:center; color:#666; margin-bottom: 20px;">นำผลลัพธ์ที่คำนวณได้จากทุกส่วนมารวมกัน</p>
+        
+        <div style="background: var(--gray-bg); border: 1px solid #eee; padding: 20px; border-radius: 8px;">
+          <ul class="sum-list" id="sum-list-container">
+            </ul>
+        </div>
+
+        <div class="total-box">
+          <span>ยอดรวมสุทธิ (Grand Total):</span>
+          <span id="grand-total-display">0</span>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+
+  <footer>
+    <div class="footer-content">
+      
+      <div class="f-col-info">
+        <div class="footer-logo-area">
+          <img src="image/PP AND MSW LOGO.png" style="height: 80px;">
+        </div>
+        <h3>ระบบคำนวณค่าความร้อน</h3>
+        <h3 style="margin-top:0;">และประเมินศักยภาพโรงไฟฟ้าพลังงานขยะชุมชน</h3>
+        <p>
+          แบบจำลองทางคณิตศาสตร์สำหรับทำนายค่าความร้อนและพลังงานไฟฟ้า 
+          (MSW Heating Value & Power Generation)
+        </p>
+      </div>
+
+      <div class="f-col-menu">
+        <div class="f-title">MENU</div>
+        <ul class="f-links">
+          <li><a href="#">Home</a></li>
+          <li><a href="#">HHV Calculator</a></li>
+          <li><a href="#">Power Plant Performance</a></li>
+          <li><a href="#">Simulation and Calculation</a></li>
+          <li><a href="#">User Manual</a></li>
+        </ul>
+      </div>
+
+      <div class="f-col-contact">
+        <div class="f-title">ติดต่อเรา (Contact Us)</div>
+        <div class="contact-detail">
+          <p><strong>The Waste Incineration Research Center (WIRC)</strong></p>
+          <p>Department of Mechanical and Aerospace Engineering</p>
+          <p>King Mongkut's University of Technology North Bangkok (KMUTNB)</p>
+          <p style="margin-top: 15px;">Email: contact@email.kmutnb.ac.th</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="copyright">
+      Copyright © 2024 WIRC, KMUTNB. All Rights Reserved.
+    </div>
+  </footer>
+
+  <script>
+    let pageResults = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+
+    function goToPage(pageId) {
+        // 1. Remove active class from buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        
+        // 2. Hide all sections
+        document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+
+        // 3. Show target section
+        let targetSection = document.getElementById('page-' + pageId);
+        if (targetSection) {
+            targetSection.classList.add('active');
+        }
+
+        // 4. Set active button
+        let buttons = document.querySelectorAll('.nav-btn');
+        let indexToCheck = -1;
+        if(pageId === 'sum') {
+            indexToCheck = buttons.length - 1; // Last button
+        } else {
+            indexToCheck = pageId - 1; // Array index starts at 0
+        }
+
+        if(buttons[indexToCheck]) {
+            buttons[indexToCheck].classList.add('active');
+        }
+
+        if(pageId === 'sum') renderSumPage();
+    }
+
+    function calculate(pageIndex) {
+        let inputs = document.querySelectorAll(`.inp-${pageIndex}`);
+        let sum = 0;
+        inputs.forEach(input => {
+            let val = parseFloat(input.value);
+            if(isNaN(val)) val = 0;
+            sum += val;
+        });
+        pageResults[pageIndex] = sum;
+        document.getElementById(`res-${pageIndex}`).innerText = sum.toLocaleString();
+    }
+
+    function renderSumPage() {
+        let container = document.getElementById('sum-list-container');
+        container.innerHTML = '';
+        let grandTotal = 0;
+        for(let i=1; i<=7; i++) {
+            let val = pageResults[i];
+            grandTotal += val;
+            let html = `
+                <li class="sum-item">
+                    <span class="sum-label">ผลลัพธ์ส่วนที่ ${i}</span>
+                    <span class="sum-value" style="font-weight:bold;">+ ${val.toLocaleString()}</span>
+                </li>
+            `;
+            container.innerHTML += html;
+        }
+        document.getElementById('grand-total-display').innerText = grandTotal.toLocaleString();
+    }
+  </script>
+
+</body>
+</html>
