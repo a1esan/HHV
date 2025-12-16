@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HHV cal Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary-blue: #003366;
+    --dark-footer: #1a2533;
+    --accent-yellow: #f5c242;
+    --text-grey: #666;
+    --input-bg: #f3f6f9; /* สีพื้นหลังช่องกรอกข้อมูล */
+    --result-blue: #8bcae6; /* สีฟ้ากล่องผลลัพธ์ */
+  }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* --- 1. Header (คงเดิม) --- */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #eee;
+  }
+  .header-left { display: flex; align-items: center; gap: 15px; }
+  .logos { display: flex; gap: 10px; align-items: center; }
+  .logos img { height: 50px; width: auto; }
+  .brand-text { border-left: 1px solid #ddd; padding-left: 15px; }
+  .brand-text h1 { font-size: 1.2rem; font-weight: 700; color: var(--primary-blue); margin: 0; }
+  .brand-text p { font-size: 0.8rem; color: var(--text-grey); margin: 0; }
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .nav-link { text-decoration: none; color: var(--text-grey); font-size: 0.95rem; }
+  .lang-switch { border: 1px solid var(--primary-blue); border-radius: 20px; padding: 4px 15px; color: var(--primary-blue); font-size: 0.9rem; cursor: pointer; }
+  .hamburger { font-size: 1.5rem; color: var(--primary-blue); cursor: pointer; }
+
+  /* --- 2. Hero Section (แก้ไขและเพิ่มเติม) --- */
+  .hero {
+    text-align: center;
+    padding: 60px 20px 80px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex: 1;
+  }
+  .hero h2 { font-size: 2.2rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; }
+  .hero p.subtitle { font-size: 1rem; color: var(--text-grey); margin-bottom: 50px; line-height: 1.6; }
+
+  /* --- ส่วนที่เพิ่มใหม่: Calculation Layout --- */
+  .calculation-container {
+    display: flex;
+    align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
+    justify-content: center; /* จัดให้อยู่กึ่งกลางแนวนอน */
+    gap: 50px; /* ระยะห่างระหว่างก้อนซ้าย กลาง ขวา */
+    margin-top: 40px;
+    flex-wrap: wrap; /* รองรับมือถือ (ปัดตกบรรทัด) */
+  }
+
+  /* คอลัมน์ซ้าย: Input Fields */
+  .input-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 320px;
+    text-align: left;
+  }
+  .input-group label {
+    display: block;
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  .input-box {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--input-bg);
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    color: #333;
+    box-sizing: border-box;
+    outline: none;
+    transition: 0.2s;
+  }
+  .input-box:focus {
+    box-shadow: 0 0 0 2px #d1e3f8;
+  }
+
+  /* คอลัมน์กลาง: รูปภาพลูกศร */
+  .process-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  /* รูปภาพตรงกลาง (ถ้ามีไฟล์รูป ให้แก้ src เป็น path รูปของคุณ) */
+  .process-img {
+    height: 120px; /* ปรับขนาดตามต้องการ */
+    width: auto;
+    object-fit: contain;
+  }
+
+  /* คอลัมน์ขวา: Output */
+  .output-col {
+    width: 320px;
+    text-align: left;
+  }
+  .output-box {
+    width: 100%;
+    height: 100px; /* ความสูงของกล่องผลลัพธ์ */
+    background-color: var(--result-blue);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white; /* หรือสีน้ำเงินเข้มตามชอบ */
+    margin-top: 8px;
+    box-shadow: 0 4px 10px rgba(139, 202, 230, 0.4);
+  }
+
+  /* ================== CSS Footer (คงเดิม) ================== */
+  footer {
+    background-color: #161F2B;
+    color: #ffffff;
+    font-family: 'Sarabun', sans-serif;
+    margin-top: auto;
+  }
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+  }
+  .f-col-info { flex: 2; padding-right: 40px; }
+  .f-col-info h3 { margin: 5px 0; font-size: 1.1rem; }
+  .f-col-info p { color: #ccc; font-size: 0.9rem; margin-top: 10px; line-height: 1.6; }
+  .f-col-menu { flex: 1; border-left: 1px dashed rgba(255,255,255,0.3); padding-left: 40px; }
+  .f-col-contact { flex: 1.5; border-left: 1px dashed rgba(255,255,255,0.3); padding-left: 40px; }
+  .f-title { font-weight: bold; margin-bottom: 20px; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+  .f-links { list-style: none; padding: 0; }
+  .f-links li { margin-bottom: 12px; }
+  .f-links a { color: #dddddd; text-decoration: none; transition: 0.3s; }
+  .f-links a:hover { color: #ffca28; }
+  .contact-detail p { margin-bottom: 8px; color: #ccc; font-size: 0.9rem; }
+  .copyright { background-color: #0f151d; text-align: center; padding: 20px; font-size: 0.8rem; color: #666; border-top: 1px solid rgba(255,255,255,0.05); }
+
+  /* Responsive เล็กน้อย เพื่อให้เวลาจอมือถือ กล่องไม่ชนกัน */
+  @media (max-width: 900px) {
+    .calculation-container {
+      flex-direction: column;
+      gap: 30px;
+    }
+    .process-img {
+      transform: rotate(90deg); /* หมุนลูกศรลงถ้าเป็นมือถือ */
+      margin: 10px 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <div class="logos">
+        <img src="image/KMUTNB LOGO.png" style="height: 50px;">
+        <img src="image/MAE LOGO.png" style="height: 50px;">
+        <img src="image/WRIC LOGO.png" style="height: 50px;">
+      </div>
+      <div class="brand-text">
+        <h1>WIRC-MSW Model</h1>
+        <p>Mathematical Model for MSW in Developing Countries</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <a href="#" class="nav-link">User Manual</a>
+      <div class="lang-switch">TH | EN</div>
+      <div class="hamburger">☰</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h2>ทำนายค่าความร้อน (HHV Predicting)</h2>
+    <p class="subtitle">
+      ประเมินค่าความร้อน (HHV) จากองค์ประกอบขยะ (Physical Composition) เหมาะสำหรับการวิเคราะห์เชื้อเพลิงเบื้องต้น 
+    </p>
+
+    <div class="calculation-container">
+      
+      <div class="input-col">
+        <div class="input-group">
+          <label>Food Waste (%wt)</label>
+          <input type="number" class="input-box" placeholder="">
+        </div>
+        <div class="input-group">
+          <label>Plastic waste (%wt)</label>
+          <input type="number" class="input-box" placeholder="">
+        </div>
+        <div class="input-group">
+          <label>Paper (%wt)</label>
+          <input type="number" class="input-box" placeholder="">
+        </div>
+      </div>
+
+      <div class="process-col">
+        <img src="image/Arrow.png" style="height: 100px;">
+        </div>
+
+      <div class="output-col">
+        <div class="input-group">
+            <label>HHV (kJ/kg)</label>
+            <div class="output-box">
+              0 </div>
+        </div>
+      </div>
+
+    </div>
+    </section>
+
+  <div class="footer-top-border"></div> 
+  <footer>
+    <div class="footer-content">
+      
+      <div class="f-col-info">
+        <div class="footer-logo-area">
+        <img src="image/PP AND MSW LOGO.png" style="height: 80px;"></div>
+        <h3>ระบบคำนวณค่าความร้อน</h3>
+        <h3 style="margin-top:0;">และประเมินศักยภาพโรงไฟฟ้าพลังงานขยะชุมชน</h3>
+        <p>
+          แบบจำลองทางคณิตศาสตร์สำหรับทำนายค่าความร้อนและพลังงานไฟฟ้า 
+          (MSW Heating Value & Power Generation)
+        </p>
+      </div>
+
+      <div class="f-col-menu">
+        <div class="f-title">MENU</div>
+        <ul class="f-links">
+          <li><a href="#">Home</a></li>
+          <li><a href="#">HHV Calculator</a></li>
+          <li><a href="#">Power Plant Performance</a></li>
+          <li><a href="#">Simulation and Calculation</a></li>
+          <li><a href="#">User Manual</a></li>
+        </ul>
+      </div>
+
+      <div class="f-col-contact">
+        <div class="f-title">ติดต่อเรา (Contact Us)</div>
+        <div class="contact-detail">
+          <p><strong>The Waste Incineration Research Center (WIRC)</strong></p>
+          <p>Department of Mechanical and Aerospace Engineering</p>
+          <p>King Mongkut's University of Technology North Bangkok (KMUTNB)</p>
+          <p style="margin-top: 15px;">Email: contact@email.kmutnb.ac.th</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="copyright">
+      Copyright © 2024 WIRC, KMUTNB. All Rights Reserved.
+    </div>
+  </footer>
+
+</body>
+</html>
