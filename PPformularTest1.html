@@ -285,7 +285,7 @@
       <div class="nav-btn" onclick="goToPage(4)">4. อัตราผลิตไอน้ำ</div>
       <div class="nav-btn" onclick="goToPage(5)">5. พลังงานไฟฟ้า</div>
       <div class="nav-btn" onclick="goToPage(6)">6. Boiler</div>
-      <div class="nav-btn" onclick="goToPage(7)">7. Turbine/Gen</div>
+      <div class="nav-btn" onclick="goToPage(7)">7. Turbine/Generator</div>
       <div class="nav-btn" onclick="goToPage('sum')" style="margin-top: 10px; border-color: var(--primary-blue); color: var(--primary-blue);">Summary</div>
     </nav>
 
@@ -293,8 +293,13 @@
       
       <div id="page-1" class="page-section active">
         <h3 class="section-title">ส่วนที่ 1: ปริมาณอากาศที่ใช้ในการเผาไหม้</h3>
-        <div class="input-group"><label>ค่า A1 (kg/h):</label><input type="number" class="inp-1" placeholder="0"></div>
-        <div class="input-group"><label>ค่า A2 (kg/h):</label><input type="number" class="inp-1" placeholder="0"></div>
+        <div class="input-group"><label>ปริมาณขยะมูลฝอย (ton/day):</label><input type="number" class="inp-1" placeholder="0"></div>
+        <div class="input-group"><label>ค่าความร้อน (kJ/kg)
+:</label><input type="number" class="inp-1" placeholder="0"></div>
+	<div class="input-group">
+    <label>ค่าความชื้น (%wt) :</label>
+    <input type="number" class="inp-1" value="61.26" disabled>
+</div>
         <button class="btn-calc" onclick="calculate(1)">คำนวณ (Calculate)</button>
         <div class="result-box">ผลลัพธ์: <span id="res-1">0</span></div>
       </div>
@@ -356,10 +361,6 @@
             </ul>
         </div>
 
-        <div class="total-box">
-          <span>ยอดรวมสุทธิ (Grand Total):</span>
-          <span id="grand-total-display">0</span>
-        </div>
       </div>
 
     </main>
@@ -409,30 +410,21 @@
     </div>
   </footer>
 
-  <script>
+<script>
+    
     let pageResults = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
 
     function goToPage(pageId) {
-        // 1. Remove active class from buttons
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        
-        // 2. Hide all sections
         document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
 
-        // 3. Show target section
         let targetSection = document.getElementById('page-' + pageId);
         if (targetSection) {
             targetSection.classList.add('active');
         }
 
-        // 4. Set active button
         let buttons = document.querySelectorAll('.nav-btn');
-        let indexToCheck = -1;
-        if(pageId === 'sum') {
-            indexToCheck = buttons.length - 1; // Last button
-        } else {
-            indexToCheck = pageId - 1; // Array index starts at 0
-        }
+        let indexToCheck = (pageId === 'sum') ? buttons.length - 1 : pageId - 1;
 
         if(buttons[indexToCheck]) {
             buttons[indexToCheck].classList.add('active');
@@ -449,28 +441,43 @@
             if(isNaN(val)) val = 0;
             sum += val;
         });
+        
+        // บันทึกค่าที่คำนวณได้ลงในตัวแปรแยกตามหน้า
         pageResults[pageIndex] = sum;
         document.getElementById(`res-${pageIndex}`).innerText = sum.toLocaleString();
     }
 
     function renderSumPage() {
         let container = document.getElementById('sum-list-container');
-        container.innerHTML = '';
-        let grandTotal = 0;
+        container.innerHTML = ''; // ล้างข้อมูลเก่าก่อนแสดงใหม่
+
+        // 2. กำหนดชื่อหัวข้อให้ตรงตามเมนูที่คุณมี
+        const pageNames = {
+            1: "ปริมาณอากาศที่ใช้ในการเผาไหม้",
+            2: "ปริมาณก๊าซไอเสีย",
+            3: "อุณหภูมิการเผาไหม้",
+            4: "อัตราการผลิตไอน้ำ",
+            5: "พลังงานไฟฟ้าที่ผลิตได้",
+            6: "ประสิทธิภาพ Boiler",
+            7: "ประสิทธิภาพ Turbine/Generator"
+        };
+
+        // 3. วนลูปโชว์ค่าแยกตามบรรทัด (ไม่มีการบวกยอดรวมแล้ว)
         for(let i=1; i<=7; i++) {
             let val = pageResults[i];
-            grandTotal += val;
             let html = `
-                <li class="sum-item">
-                    <span class="sum-label">ผลลัพธ์ส่วนที่ ${i}</span>
-                    <span class="sum-value" style="font-weight:bold;">+ ${val.toLocaleString()}</span>
+                <li class="sum-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; list-style: none;">
+                    <span class="sum-label" style="color: #444; font-size: 16px;">${pageNames[i]}</span>
+                    <span class="sum-value" style="font-weight:bold; color: #2c3e50; font-size: 18px;">
+                        ${val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </span>
                 </li>
             `;
             container.innerHTML += html;
         }
-        document.getElementById('grand-total-display').innerText = grandTotal.toLocaleString();
+
     }
-  </script>
+</script>
 
 </body>
 </html>
