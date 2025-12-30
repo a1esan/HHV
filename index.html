@@ -46,13 +46,39 @@
   .lang-switch { border: 1px solid var(--primary-blue); border-radius: 20px; padding: 4px 15px; color: var(--primary-blue); font-size: 0.9rem; cursor: pointer; }
   .hamburger { font-size: 1.5rem; color: var(--primary-blue); cursor: pointer; }
 
+  /* ================== ส่วนที่เพิ่ม: CSS สำหรับ Side Menu (เพื่อให้เด้งออกมาเหมือนในรูป) ================== */
+  .menu-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); display: none; z-index: 999;
+  }
+  .menu-overlay.active { display: block; }
+
+  .side-menu {
+    position: fixed; top: 0; right: -400px;
+    width: 350px; height: 100%;
+    background-color: #1a2533; z-index: 1000;
+    transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    border-radius: 20px 0 0 20px; color: white; overflow-y: auto;
+  }
+  .side-menu.active { right: 0; }
+  .menu-content { padding: 40px 25px; text-align: center; }
+  .close-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; cursor: pointer; color: white; }
+  .menu-links { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+  .menu-links a {
+    display: block; padding: 14px; color: white; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; transition: 0.3s;
+    font-size: 0.95rem; text-align: left;
+  }
+  .menu-links a:hover { background-color: rgba(255,255,255,0.1); color: var(--accent-yellow); border-color: white; }
+  /* ========================================================================================= */
+
   /* --- 2. Hero Section --- */
   .hero {
     text-align: center;
-    padding: 60px 20px 80px 20px; /* เพิ่ม padding ล่าง */
+    padding: 60px 20px 80px 20px;
     max-width: 1200px;
     margin: 0 auto;
-    flex: 1; /* ดัน Footer ลงล่างสุดเสมอ */
+    flex: 1;
   }
   .hero h2 { font-size: 2.2rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; }
   .hero p.subtitle { font-size: 1rem; color: var(--text-grey); margin-bottom: 50px; line-height: 1.6; }
@@ -173,6 +199,24 @@ footer {
 </head>
 <body>
 
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideMenu" class="side-menu">
+      <div class="menu-content">
+          <div class="close-btn" onclick="toggleMenu()">×</div>
+          <div class="menu-header">
+              <h2>WIRC-MSW Model</h2>
+              <p>Mathematical Model for MSW in Developing Countries</p>
+          </div>
+          <nav class="menu-links">
+              <a href="index.html" onclick="toggleMenu()">Home</a>
+              <a href="HHV_test.html" onclick="toggleMenu()">HHV Calculator</a>
+              <a href="PPformularTest1.html" onclick="toggleMenu()">Power Plant Performance</a>
+              <a href="PPformularTest1.html" onclick="toggleMenu()">Simulation and Calculation</a>
+              <a href="manual.html" onclick="toggleMenu()">User Manual</a>
+              <a href="#" onclick="toggleMenu()">Contact Us</a>
+          </nav>
+      </div>
+  </div>
   <header>
     <div class="header-left">
       <div class="logos">
@@ -181,7 +225,7 @@ footer {
         <img src="image/WRIC LOGO.png" style="height: 50px;">
       </div>
 
-<div class="brand-text">
+      <div class="brand-text">
         <h1>WIRC-MSW Model</h1>
         <p>Mathematical Model for MSW in Developing Countries</p>
       </div>
@@ -189,7 +233,7 @@ footer {
     <div class="header-right">
       <a href="manual.html" class="nav-link">User Manual</a>
       <div class="lang-switch">TH | EN</div>
-      <div class="hamburger">☰</div>
+      <div class="hamburger" onclick="toggleMenu()">☰</div>
     </div>
   </header>
 
@@ -224,13 +268,13 @@ footer {
     </div>
   </section>
 
-<div class="footer-top-border"></div> 
+  <div class="footer-top-border"></div> 
   <footer>
     <div class="footer-content">
-      
+
       <div class="f-col-info">
         <div class="footer-logo-area">
-        <img src="image/PP AND MSW LOGO.png" style="height: 80px;"></div>
+          <img src="image/PP AND MSW LOGO.png" style="height: 80px;"></div>
         <h3>ระบบคำนวณค่าความร้อน</h3>
         <h3 style="margin-top:0;">และประเมินศักยภาพโรงไฟฟ้าพลังงานขยะชุมชน</h3>
         <p>
@@ -266,6 +310,15 @@ footer {
       Copyright © 2024 WIRC, KMUTNB. All Rights Reserved.
     </div>
   </footer>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('menuOverlay');
+      menu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+  </script>
 
 </body>
 </html>

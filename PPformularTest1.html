@@ -50,6 +50,32 @@
     .lang-switch { border: 1px solid var(--primary-blue); border-radius: 20px; padding: 4px 15px; color: var(--primary-blue); font-size: 0.9rem; cursor: pointer; }
     .hamburger { font-size: 1.5rem; color: var(--primary-blue); cursor: pointer; }
 
+/* ================== ส่วนที่เพิ่ม: CSS สำหรับ Side Menu (เพื่อให้เด้งออกมาเหมือนในรูป) ================== */
+  .menu-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); display: none; z-index: 999;
+  }
+  .menu-overlay.active { display: block; }
+
+  .side-menu {
+    position: fixed; top: 0; right: -400px;
+    width: 350px; height: 100%;
+    background-color: #1a2533; z-index: 1000;
+    transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    border-radius: 20px 0 0 20px; color: white; overflow-y: auto;
+  }
+  .side-menu.active { right: 0; }
+  .menu-content { padding: 40px 25px; text-align: center; }
+  .close-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; cursor: pointer; color: white; }
+  .menu-links { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+  .menu-links a {
+    display: block; padding: 14px; color: white; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; transition: 0.3s;
+    font-size: 0.95rem; text-align: left;
+  }
+  .menu-links a:hover { background-color: rgba(255,255,255,0.1); color: var(--accent-yellow); border-color: white; }
+  /* ========================================================================================= */
+
     /* --- 2. Hero Section (คงเดิม) --- */
     .hero {
       text-align: center;
@@ -192,64 +218,81 @@
       font-size: 1.4rem; font-weight: bold; color: var(--primary-blue);
     }
 
-    /* --- 4. Footer (คงเดิม) --- */
-    footer {
-      background-color: var(--dark-footer);
-      color: #ffffff;
-      font-family: 'Sarabun', sans-serif;
-      margin-top: auto;
-    }
-    .footer-content {
-      display: flex;
-      justify-content: space-between;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 60px 20px;
-    }
-    .f-col-info { flex: 2; padding-right: 40px; }
-    .f-col-info h3 { margin: 5px 0; font-size: 1.1rem; }
-    .f-col-info p { color: #ccc; font-size: 0.9rem; margin-top: 10px; line-height: 1.6; }
-    
-    .f-col-menu {
-      flex: 1;
-      border-left: 1px dashed var(--border-dashed);
-      padding-left: 40px;
-    }
-    .f-col-contact {
-      flex: 1.5;
-      border-left: 1px dashed var(--border-dashed);
-      padding-left: 40px;
-    }
-    
-    .f-title { font-weight: bold; margin-bottom: 20px; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
-    .f-links { list-style: none; padding: 0; }
-    .f-links li { margin-bottom: 12px; }
-    .f-links a { color: #dddddd; text-decoration: none; transition: 0.3s; }
-    .f-links a:hover { color: var(--accent-yellow); }
-    
-    .contact-detail p { margin-bottom: 8px; color: #ccc; font-size: 0.9rem; margin-top: 0; }
-    
-    .copyright {
-      background-color: #0f151d;
-      text-align: center;
-      padding: 20px;
-      font-size: 0.8rem;
-      color: #666;
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
+ /* ================== CSS Footer (คงเดิม) ================== */
+  footer {
+    background-color: #161F2B;
+    color: #ffffff;
+    font-family: 'Sarabun', sans-serif;
+    margin-top: auto;
+  }
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+  }
+  .f-col-info { flex: 2; padding-right: 40px; }
+  .f-col-info h3 { margin: 5px 0; font-size: 1.1rem; }
+  .f-col-info p { color: #ccc; font-size: 0.9rem; margin-top: 10px; line-height: 1.6; }
+  .f-col-menu { flex: 1; border-left: 1px dashed rgba(255,255,255,0.3); padding-left: 40px; }
+  .f-col-contact { flex: 1.5; border-left: 1px dashed rgba(255,255,255,0.3); padding-left: 40px; }
+  .f-title { font-weight: bold; margin-bottom: 20px; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+  .f-links { list-style: none; padding: 0; }
+  .f-links li { margin-bottom: 12px; }
+  .f-links a { color: #dddddd; text-decoration: none; transition: 0.3s; }
+  .f-links a:hover { color: #ffca28; }
+  .contact-detail p { margin-bottom: 8px; color: #ccc; font-size: 0.9rem; }
+  .copyright { background-color: #0f151d; text-align: center; padding: 20px; font-size: 0.8rem; color: #666; border-top: 1px solid rgba(255,255,255,0.05); }
 
-    /* Responsive */
-    @media (max-width: 800px) {
-      .app-container { flex-direction: column; height: auto; }
-      .sidebar { width: 100%; display: flex; overflow-x: auto; padding: 10px; gap: 10px; box-sizing: border-box; }
-      .nav-btn { width: auto; white-space: nowrap; margin-bottom: 0; flex-shrink: 0; }
-      .footer-content { flex-direction: column; gap: 30px; }
-      .f-col-menu, .f-col-contact { border-left: none; padding-left: 0; border-top: 1px dashed var(--border-dashed); padding-top: 20px; }
-      .header-right { display: none; }
+  /* Responsive เล็กน้อย เพื่อให้เวลาจอมือถือ กล่องไม่ชนกัน */
+  @media (max-width: 900px) {
+    .calculation-container {
+      flex-direction: column;
+      gap: 30px;
     }
-  </style>
+.arrow {
+  width: 6px;
+  height: 70px;
+  background-color: #003366;
+  position: relative;
+  margin: 10px auto;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+}
+
+.arrow::after {
+  content: "";
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 16px solid #003366;
+}
+  }
+</style>
 </head>
 <body>
+
+<div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideMenu" class="side-menu">
+      <div class="menu-content">
+          <div class="close-btn" onclick="toggleMenu()">×</div>
+          <div class="menu-header">
+              <h2>WIRC-MSW Model</h2>
+              <p>Mathematical Model for MSW in Developing Countries</p>
+          </div>
+          <nav class="menu-links">
+              <a href="index.html" onclick="toggleMenu()">Home</a>
+              <a href="HHV_test.html" onclick="toggleMenu()">HHV Calculator</a>
+              <a href="PPformularTest1.html" onclick="toggleMenu()">Power Plant Performance</a>
+              <a href="PPformularTest1.html" onclick="toggleMenu()">Simulation and Calculation</a>
+              <a href="manual.html" onclick="toggleMenu()">User Manual</a>
+              <a href="#" onclick="toggleMenu()">Contact Us</a>
+          </nav>
+      </div>
+  </div>
 
   <header>
     <div class="header-left">
@@ -264,9 +307,9 @@
       </div>
     </div>
     <div class="header-right">
-      <a href="#" class="nav-link">User Manual</a>
+      <a href="manual.html" class="nav-link">User Manual</a>
       <div class="lang-switch">TH | EN</div>
-      <div class="hamburger">☰</div>
+      <div class="hamburger" onclick="toggleMenu()">☰</div>
     </div>
   </header>
 
@@ -385,11 +428,11 @@
       <div class="f-col-menu">
         <div class="f-title">MENU</div>
         <ul class="f-links">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">HHV Calculator</a></li>
-          <li><a href="#">Power Plant Performance</a></li>
-          <li><a href="#">Simulation and Calculation</a></li>
-          <li><a href="#">User Manual</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="HHV_test.html">HHV Calculator</a></li>
+          <li><a href="PPformularTest1.html">Power Plant Performance</a></li>
+          <li><a href="PPformularTest1.html">Simulation and Calculation</a></li>
+          <li><a href="manual.html">User Manual</a></li>
         </ul>
       </div>
 
@@ -476,6 +519,13 @@
             container.innerHTML += html;
         }
 
+    }
+
+function toggleMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('menuOverlay');
+      menu.classList.toggle('active');
+      overlay.classList.toggle('active');
     }
 </script>
 

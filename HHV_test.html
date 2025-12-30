@@ -47,6 +47,33 @@
   .lang-switch { border: 1px solid var(--primary-blue); border-radius: 20px; padding: 4px 15px; color: var(--primary-blue); font-size: 0.9rem; cursor: pointer; }
   .hamburger { font-size: 1.5rem; color: var(--primary-blue); cursor: pointer; }
 
+/* ================== ส่วนที่เพิ่ม: CSS สำหรับ Side Menu (เพื่อให้เด้งออกมาเหมือนในรูป) ================== */
+  .menu-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); display: none; z-index: 999;
+  }
+  .menu-overlay.active { display: block; }
+
+  .side-menu {
+    position: fixed; top: 0; right: -400px;
+    width: 350px; height: 100%;
+    background-color: #1a2533; z-index: 1000;
+    transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    border-radius: 20px 0 0 20px; color: white; overflow-y: auto;
+  }
+  .side-menu.active { right: 0; }
+  .menu-content { padding: 40px 25px; text-align: center; }
+  .close-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; cursor: pointer; color: white; }
+  .menu-links { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+  .menu-links a {
+    display: block; padding: 14px; color: white; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; transition: 0.3s;
+    font-size: 0.95rem; text-align: left;
+  }
+  .menu-links a:hover { background-color: rgba(255,255,255,0.1); color: var(--accent-yellow); border-color: white; }
+  /* ========================================================================================= */
+
+
   /* --- 2. Hero Section (แก้ไขและเพิ่มเติม) --- */
   .hero {
     text-align: center;
@@ -58,50 +85,96 @@
   .hero h2 { font-size: 2.2rem; color: var(--primary-blue); margin-bottom: 10px; font-weight: 600; }
   .hero p.subtitle { font-size: 1rem; color: var(--text-grey); margin-bottom: 50px; line-height: 1.6; }
 
-  /* --- ส่วนที่เพิ่มใหม่: Calculation Layout --- */
+ /* --- ส่วนที่เพิ่มใหม่: Calculation Layout --- */
+
   .calculation-container {
+
     display: flex;
+
     flex-direction: column;   /* แนวตั้ง */
+
     align-items: center;      /* กลางแนวนอน */
+
     justify-content: center;
+
     gap: 30px;
+
     flex-wrap: wrap; /* รองรับมือถือ (ปัดตกบรรทัด) */
+
   }
 
+
+
   /* Input */
+
   .input-col {
+
     width: 320px;
+
     display: flex;
+
     flex-direction: column;
+
     gap: 20px;
+
   }
+
   .input-group label {
+
     display: block;
+
     font-size: 0.9rem;
+
     color: #888;
+
     margin-bottom: 8px;
+
   }
+
   .input-box {
+
     width: 100%;
+
     padding: 15px;
+
     background-color: var(--input-bg);
+
     border: none;
+
     border-radius: 12px;
+
     font-size: 1rem;
+
     color: #333;
+
     box-sizing: border-box;
+
     outline: none;
+
     transition: 0.2s;
+
   }
+
   .input-box:focus {
+
     box-shadow: 0 0 0 2px #d1e3f8;
+
   }
+
+
+
 
 
   /* Output */
+
   .output-col {
-   width: 320px;
-  }
+
+    width: 320px;      /* กำหนดความกว้างให้เท่ากับช่องกรอกด้านบน */
+    margin: 0 auto;    /* บรรทัดนี้สำคัญ: สั่งให้คอลัมน์ขยับมาอยู่กึ่งกลางหน้าจอ */
+    display: flex;     /* ใช้ Flexbox เพื่อจัดการของข้างใน */
+    flex-direction: column; 
+    align-items: center; /* จัดให้ Label และ Box อยู่กึ่งกลางของคอลัมน์ */
+}
 
   .output-box {
     width: 100%;
@@ -117,7 +190,7 @@
     margin-top: 8px;
     box-shadow: 0 4px 10px rgba(139, 202, 230, 0.4);
   }
-
+  
   /* ================== CSS Footer (คงเดิม) ================== */
   footer {
     background-color: #161F2B;
@@ -172,8 +245,28 @@
 }
   }
 </style>
+
 </head>
 <body>
+
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideMenu" class="side-menu">
+      <div class="menu-content">
+          <div class="close-btn" onclick="toggleMenu()">×</div>
+          <div class="menu-header">
+              <h2>WIRC-MSW Model</h2>
+              <p>Mathematical Model for MSW in Developing Countries</p>
+          </div>
+          <nav class="menu-links">
+              <a href="index.html" onclick="toggleMenu()">Home</a>
+              <a href="HHV_test.html" onclick="toggleMenu()">HHV Calculator</a>
+              <a href="PPformularTest1.html" onclick="toggleMenu()">Power Plant Performance</a>
+              <a href="PPformularTest1.html" onclick="toggleMenu()">Simulation and Calculation</a>
+              <a href="manual.html" onclick="toggleMenu()">User Manual</a>
+              <a href="#" onclick="toggleMenu()">Contact Us</a>
+          </nav>
+      </div>
+  </div>
 
   <header>
     <div class="header-left">
@@ -182,15 +275,16 @@
         <img src="image/MAE LOGO.png" style="height: 50px;">
         <img src="image/WRIC LOGO.png" style="height: 50px;">
       </div>
+
       <div class="brand-text">
         <h1>WIRC-MSW Model</h1>
         <p>Mathematical Model for MSW in Developing Countries</p>
       </div>
     </div>
     <div class="header-right">
-      <a href="#" class="nav-link">User Manual</a>
+      <a href="manual.html" class="nav-link">User Manual</a>
       <div class="lang-switch">TH | EN</div>
-      <div class="hamburger">☰</div>
+      <div class="hamburger" onclick="toggleMenu()">☰</div>
     </div>
   </header>
 
@@ -202,19 +296,29 @@
 
     <div class="calculation-container">
       
-      <div class="input-col">
-        <div class="input-group">
-          <label>Food Waste (%wt)</label>
-          <input type="number" class="input-box" placeholder="">
-        </div>
-        <div class="input-group">
-          <label>Plastic waste (%wt)</label>
-          <input type="number" class="input-box" placeholder="">
-        </div>
-        <div class="input-group">
-          <label>Paper (%wt)</label>
-          <input type="number" class="input-box" placeholder="">
-        </div>
+    <div class="input-col">
+    <div class="input-group">
+        <label>Food Waste (%wt)</label>
+        <input type="number" id="input_fw" class="input-box" placeholder="0">
+    </div>
+    <div class="input-group">
+        <label>Plastic Waste (%wt)</label>
+        <input type="number" id="input_pf" class="input-box" placeholder="0">
+    </div>
+    <div class="input-group">
+        <label>Paper (%wt)</label>
+        <input type="number" id="input_pa" class="input-box" placeholder="0">
+    </div>
+    
+    <div class="input-group"><label>Textile (%wt)</label><input type="number" id="input_textil" class="input-box"></div>
+    <div class="input-group"><label>Wood (%wt)</label><input type="number" id="input_wood" class="input-box"></div>
+    <div class="input-group"><label>Rubber (%wt)</label><input type="number" id="input_rubber" class="input-box"></div>
+
+    <button onclick="startCalculation()" style="padding: 15px; background: #003366; color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 1rem; width: 100%; margin-top: 10px;">
+        คำนวณค่า HHV
+    </button>
+</div>
+
       </div>
 
       <div class="process-col">
@@ -222,12 +326,11 @@
       </div>
 
       <div class="output-col">
-        <div class="input-group">
-            <label>HHV (kJ/kg)</label>
-            <div class="output-box">
-              0 </div>
-        </div>
-      </div>
+    <div class="input-group">
+        <label>HHV (kJ/kg)</label>
+        <div id="display_hhv" class="output-box">0</div>
+    </div>
+</div>
 
     </div>
     </section>
@@ -250,11 +353,11 @@
       <div class="f-col-menu">
         <div class="f-title">MENU</div>
         <ul class="f-links">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">HHV Calculator</a></li>
-          <li><a href="#">Power Plant Performance</a></li>
-          <li><a href="#">Simulation and Calculation</a></li>
-          <li><a href="#">User Manual</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="HHV_test.html">HHV Calculator</a></li>
+          <li><a href="PPformularTest1.html">Power Plant Performance</a></li>
+          <li><a href="PPformularTest1.html">Simulation and Calculation</a></li>
+          <li><a href="manual.html">User Manual</a></li>
         </ul>
       </div>
 
@@ -274,6 +377,58 @@
       Copyright © 2024 WIRC, KMUTNB. All Rights Reserved.
     </div>
   </footer>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('menuOverlay');
+      menu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+async function startCalculation() {
+    // 1. ดึงค่าจากช่อง input ด้วย ID ที่เราตั้งไว้ข้างบน
+    const fw = document.getElementById('input_fw').value;
+    const pf = document.getElementById('input_pf').value;
+    const pa = document.getElementById('input_pa').value;
+
+    // ถ้าลืมกรอกข้อมูลให้เตือน
+    if(!fw || !pf || !pa) {
+        alert("กรุณากรอกค่า Food, Plastic และ Paper");
+        return;
+    }
+
+    // เปลี่ยนเลข 0 เป็นจุดไข่ปลาเพื่อบอกว่ากำลังคำนวณ
+    document.getElementById('display_hhv').innerText = "...";
+
+    try {
+        // 2. ส่งข้อมูลไปที่ Backend (Python) ที่พอร์ต 5000
+        const response = await fetch('http://127.0.0.1:5000/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fw: parseFloat(fw),
+                pf: parseFloat(pf),
+                pa: parseFloat(pa)
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // 3. แสดงผลลัพธ์ที่ MATLAB ส่งกลับมา
+            document.getElementById('display_hhv').innerText = data.hhv.toFixed(2);
+        } else {
+            alert("Error: " + data.error);
+            document.getElementById('display_hhv').innerText = "0";
+        }
+    } catch (error) {
+        console.error(error);
+        alert("เชื่อมต่อ Backend ไม่ได้! เช็คว่ารัน py app.py ในหน้าจอดำค้างไว้หรือยัง?");
+        document.getElementById('display_hhv').innerText = "0";
+    }
+}
+</script>
 
 </body>
 </html>
