@@ -167,28 +167,52 @@
 
   /* Output */
 
+
+
   .output-col {
 
+
+
     width: 320px;      /* กำหนดความกว้างให้เท่ากับช่องกรอกด้านบน */
+
     margin: 0 auto;    /* บรรทัดนี้สำคัญ: สั่งให้คอลัมน์ขยับมาอยู่กึ่งกลางหน้าจอ */
+
     display: flex;     /* ใช้ Flexbox เพื่อจัดการของข้างใน */
-    flex-direction: column; 
+
+    flex-direction: column;
+
     align-items: center; /* จัดให้ Label และ Box อยู่กึ่งกลางของคอลัมน์ */
+
 }
 
+
+
   .output-box {
-    width: 100%;
+
+    width: 320px;
+
     height: 100px; /* ความสูงของกล่องผลลัพธ์ */
+
     background-color: var(--result-blue);
+
     border-radius: 15px;
+
     display: flex;
+
     align-items: center;
+
     justify-content: center;
+
     font-size: 1.8rem;
+
     font-weight: bold;
+
     color: white; /* หรือสีน้ำเงินเข้มตามชอบ */
+
     margin-top: 8px;
+
     box-shadow: 0 4px 10px rgba(139, 202, 230, 0.4);
+
   }
   
   /* ================== CSS Footer (คงเดิม) ================== */
