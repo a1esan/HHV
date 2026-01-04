@@ -3,38 +3,47 @@ from flask_cors import CORS
 import matlab.engine
 
 app = Flask(__name__)
-CORS(app) # อนุญาตให้หน้าเว็บส่งข้อมูลมาหา Python ได้
+CORS(app)  # อนุญาตให้เว็บออนไลน์เชื่อมต่อกับคอมพิวเตอร์ของคุณ
 
-# เริ่มรัน MATLAB Engine (ตอนรันครั้งแรกจะใช้เวลาประมาณ 10-20 วินาที)
+# เริ่มรัน MATLAB Engine
 print("กำลังเชื่อมต่อกับ MATLAB...")
 eng = matlab.engine.start_matlab()
-
-# สั่งให้ MATLAB โหลดไฟล์ Model ของคุณ
-# **สำคัญ: ไฟล์ hhv_model.mat ต้องอยู่ในโฟลเดอร์เดียวกับไฟล์นี้**
-eng.eval("load('RegressionLearnerSession02.mat')", nargout=0)
+print("เชื่อมต่อ MATLAB สำเร็จ!")
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
         data = request.json
-        fw, pa, pf = float(data['fw']), float(data['pa']), float(data['pf'])
+        # รับค่า 3 ตัวแปรหลัก
+        fw = float(data.get('fw', 0))
+        pa = float(data.get('pa', 0))
+        pf = float(data.get('pf', 0))
         
-        # เตรียมตารางข้อมูล
-        eng.workspace['input_data'] = eng.struct({'Fw': fw, 'Pa': pa, 'Pf': pf})
+        # สร้างโครงสร้างข้อมูลสำหรับ MATLAB
+        # ชื่อ 'Fw', 'Pa', 'Pf' ต้องตรงกับหัวตารางที่ใช้เทรนใน MATLAB เป๊ะๆ
+        eng.workspace['input_data'] = eng.struct({
+            'Fw': fw, 'Pa': pa, 'Pf': pf
+        })
+        
+        # แปลงเป็น Table และโหลดโมเดลเพื่อคำนวณ
         eng.eval("T = struct2table(input_data)", nargout=0)
+        eng.eval("load('RegressionLearnerSession02.mat')", nargout=0)
         
-        # โหลดไฟล์และดึงตัวโมเดลออกมา
-        eng.eval("S = load('RegressionLearnerSession02.mat')", nargout=0)
-        eng.eval("names = fieldnames(S); modelVar = S.(names{1});", nargout=0)
+        # สั่งทำนายผล
+        result = eng.eval("trainedModel.predictFcn(T)", nargout=1)
         
-        # สั่งคำนวณผ่านตัวแปรที่ดึงออกมา
-        result = eng.eval("modelVar.predictFcn(T)", nargout=1)
+        return jsonify({
+            'success': True, 
+            'hhv': float(result)
+        })
         
-        return jsonify({'success': True, 'hhv': float(result)})
     except Exception as e:
-        print(f"Error logic: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)})
+        print(f"Error logic: {str(e)}") # จะโชว์ในหน้าจอ Terminal
+        return jsonify({
+            'success': False, 
+            'error': str(e)
+        })
 
 if __name__ == '__main__':
-    # รันเซิร์ฟเวอร์ที่เครื่องคุณ Port 5000
-    app.run(port=5000)
+    # รันเซิร์ฟเวอร์ที่ Port 5000
+    app.run(port=5000, debug=False)
