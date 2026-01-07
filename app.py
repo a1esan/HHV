@@ -3,9 +3,8 @@ from flask_cors import CORS
 import matlab.engine
 
 app = Flask(__name__)
-CORS(app)  # อนุญาตให้เว็บออนไลน์เชื่อมต่อกับคอมพิวเตอร์ของคุณ
+CORS(app)
 
-# เริ่มรัน MATLAB Engine
 print("กำลังเชื่อมต่อกับ MATLAB...")
 eng = matlab.engine.start_matlab()
 print("เชื่อมต่อ MATLAB สำเร็จ!")
@@ -14,36 +13,30 @@ print("เชื่อมต่อ MATLAB สำเร็จ!")
 def predict():
     try:
         data = request.json
-        # รับค่า 3 ตัวแปรหลัก
+        # รับค่า 3 ตัวแปร
         fw = float(data.get('fw', 0))
         pa = float(data.get('pa', 0))
         pf = float(data.get('pf', 0))
         
-        # สร้างโครงสร้างข้อมูลสำหรับ MATLAB
-        # ชื่อ 'Fw', 'Pa', 'Pf' ต้องตรงกับหัวตารางที่ใช้เทรนใน MATLAB เป๊ะๆ
+        # ส่งข้อมูลเข้า MATLAB
         eng.workspace['input_data'] = eng.struct({
             'Fw': fw, 'Pa': pa, 'Pf': pf
         })
-        
-        # แปลงเป็น Table และโหลดโมเดลเพื่อคำนวณ
         eng.eval("T = struct2table(input_data)", nargout=0)
-        eng.eval("load('RegressionLearnerSession02.mat')", nargout=0)
         
-        # สั่งทำนายผล
-        result = eng.eval("trainedModel.predictFcn(T)", nargout=1)
+        # โหลดไฟล์โมเดล
+        eng.eval("S = load('RegressionLearnerSession02.mat')", nargout=0)
         
-        return jsonify({
-            'success': True, 
-            'hhv': float(result)
-        })
+        # บรรทัดนี้คือเคล็ดลับ: มันจะไปดึงโมเดลออกมาไม่ว่าข้างในจะชื่ออะไร
+        eng.eval("names = fieldnames(S); modelVar = S.(names{1});", nargout=0)
         
+        # สั่งคำนวณ
+        result = eng.eval("modelVar.predictFcn(T)", nargout=1)
+        
+        return jsonify({'success': True, 'hhv': float(result)})
     except Exception as e:
-        print(f"Error logic: {str(e)}") # จะโชว์ในหน้าจอ Terminal
-        return jsonify({
-            'success': False, 
-            'error': str(e)
-        })
+        print(f"Error logic: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
-    # รันเซิร์ฟเวอร์ที่ Port 5000
     app.run(port=5000, debug=False)
