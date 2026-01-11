@@ -14,12 +14,12 @@ def predict():
     try:
         data = request.json
         # รับค่า 6 ตัวแปร
-        fw = float(data.get('fw', 0))
-        pa = float(data.get('pa', 0))
-        pf = float(data.get('pf', 0))
-        t  = float(data.get('t', 0))
-        w  = float(data.get('w', 0))
-        lr = float(data.get('lr', 0))
+        fw = float(data.get('fw', 0)) * 3968.3276
+        pa = float(data.get('pa', 0)) * 3781.3831
+        pf = float(data.get('pf', 0)) * 7830.6109
+        t  = float(data.get('t', 0))   * 5194.5177
+        w  = float(data.get('w', 0))   * 4044.1689
+        lr = float(data.get('lr', 0)) * 6993.2662
         
         # ส่งข้อมูลเข้า MATLAB
         eng.workspace['input_data'] = eng.struct({
