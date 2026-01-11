@@ -23,7 +23,7 @@ def predict():
         
         # ส่งข้อมูลเข้า MATLAB
         eng.workspace['input_data'] = eng.struct({
-            'Fw': f, 'Pa': p, 'Pf': pf, 'T': t, 'W': w, 'Lr': lr
+            'Fw': fw, 'Pa': pa, 'Pf': pf, 'T': t, 'W': w, 'Lr': lr
         })
         eng.eval("T = struct2table(input_data)", nargout=0)
         

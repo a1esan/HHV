@@ -26,9 +26,9 @@ def predict():
         eng.eval("names = fieldnames(S); modelVar = S.(names{1});", nargout=0)
 
         # 3. สร้างฟังก์ชันภายในเพื่อคำนวณแยกทีละก้อน
-        def calc_single(f, p, pf, t, w, lr):
+        def calc_single(fw, pa, pf, t, w, lr):
             eng.workspace['input_data'] = eng.struct({
-                'Fw': f, 'Pa': p, 'Pf': pf, 'T': t, 'W': w, 'Lr': lr
+                'Fw': fw, 'Pa': pa, 'Pf': pf, 'T': t, 'W': w, 'Lr': lr
             })
             eng.eval("T_single = struct2table(input_data)", nargout=0)
             return float(eng.eval("modelVar.predictFcn(T_single)", nargout=1))
