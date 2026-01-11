@@ -13,19 +13,22 @@ print("เชื่อมต่อ MATLAB สำเร็จ!")
 def predict():
     try:
         data = request.json
-        # รับค่า 3 ตัวแปร
+        # รับค่า 6 ตัวแปร
         fw = float(data.get('fw', 0))
         pa = float(data.get('pa', 0))
         pf = float(data.get('pf', 0))
+        t = float(data.get('t', 0))
+        w = float(data.get('w', 0))
+        lr = float(data.get('lr', 0))
         
         # ส่งข้อมูลเข้า MATLAB
         eng.workspace['input_data'] = eng.struct({
-            'Fw': fw, 'Pa': pa, 'Pf': pf
+            'Fw': fw, 'Pa': pa, 'Pf': pf, 'T': t, 'W': w, 'Lr': lr
         })
         eng.eval("T = struct2table(input_data)", nargout=0)
         
         # โหลดไฟล์โมเดล
-        eng.eval("S = load('RegressionLearnerSession02.mat')", nargout=0)
+        eng.eval("S = load('RegressionLearnerSession2.mat')", nargout=0)
         
         # บรรทัดนี้คือเคล็ดลับ: มันจะไปดึงโมเดลออกมาไม่ว่าข้างในจะชื่ออะไร
         eng.eval("names = fieldnames(S); modelVar = S.(names{1});", nargout=0)
