@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import matlab.engine
-import random # เพิ่มไลบรารีสำหรับสุ่มตัวเลข
 
 app = Flask(__name__)
 CORS(app)
@@ -14,7 +13,7 @@ print("เชื่อมต่อ MATLAB สำเร็จ!")
 def predict():
     try:
         data = request.json
-        # 1. รับค่า 6 ตัวแปรจาก HTML และคูณน้ำหนัก (ตามที่คุณกำหนด)
+        # 1. รับค่า 6 ตัวแปรจากหน้าเว็บ และคูณน้ำหนักตามสูตรของคุณ
         fw = (float(data.get('fw', 0)) / 100) * 16603.48
         pa = (float(data.get('pa', 0)) / 100) * 15821.31
         pf = (float(data.get('pf', 0)) / 100) * 32763.28
@@ -22,11 +21,11 @@ def predict():
         w  = (float(data.get('w', 0)) / 100)  * 16920.80
         lr = (float(data.get('lr', 0)) / 100) * 29259.83
         
-        # 2. สุ่มค่า M (Moisture) ระหว่าง 50 ถึง 60 (ทศนิยม 2 ตำแหน่ง)
-        m_random = round(random.uniform(50, 60), 2)
+        # 2. กำหนดค่า M (Moisture) เป็น 62.89384 ตามที่สั่ง
+        m_val = 62.89384
         
-        # 3. ส่งข้อมูลเข้า MATLAB (ต้องตรงกับชื่อในรูป image_32130f.png เป๊ะๆ)
-        # สังเกตชื่อ Key: 'E_fw', 'E_pa', 'E_pf', 'E_T', 'E_W', 'E_Lr', 'M'
+        # 3. ส่งข้อมูลเข้า MATLAB (ใช้ชื่อตัวแปรตามรูป image_32130f.png เป๊ะๆ)
+        # ต้องมีครบ 7 ตัว (E_fw, E_pa, E_pf, E_T, E_W, E_Lr และ M)
         eng.workspace['input_data'] = eng.struct({
             'E_fw': fw, 
             'E_pa': pa, 
@@ -34,21 +33,23 @@ def predict():
             'E_T':  t,   # ตัว T ใหญ่
             'E_W':  w,   # ตัว W ใหญ่
             'E_Lr': lr,  # ตัว L ใหญ่ r เล็ก
-            'M':    m_random # ส่งค่าที่สุ่มได้เข้าไปด้วย
+            'M':    m_val # ค่าความชื้น 65.05
         })
         eng.eval("T = struct2table(input_data)", nargout=0)
         
-        # 4. โหลดและรันโมเดล (ต้อง Export Model มาเป็นไฟล์ .mat ก่อนนะ)
+        # 4. โหลดไฟล์โมเดล
         eng.eval("S = load('RegressionLearnerSession2.mat')", nargout=0)
+        
+        # ดึงโมเดลออกมาใช้งาน
         eng.eval("names = fieldnames(S); modelVar = S.(names{1});", nargout=0)
         
+        # 5. สั่งคำนวณ
         result = eng.eval("modelVar.predictFcn(T)", nargout=1)
         
-        # ส่งค่ากลับไปพร้อมโชว์ค่า M ที่สุ่มได้ (ถ้าต้องการ)
         return jsonify({
             'success': True, 
             'hhv': float(result),
-            'random_m': m_random 
+            'm_used': m_val
         })
 
     except Exception as e:
