@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import matlab.engine
-import random # เพิ่มไลบรารีสำหรับสุ่มตัวเลข
+import random
 
 app = Flask(__name__)
 CORS(app)
@@ -14,7 +14,7 @@ print("เชื่อมต่อ MATLAB สำเร็จ!")
 def predict():
     try:
         data = request.json
-        # 1. รับค่า 6 ตัวแปรจาก HTML และคูณน้ำหนัก (ตามที่คุณกำหนด)
+        # 1. รับค่า 6 ตัวแปร หาร 100 และคูณค่าคงที่
         fw = (float(data.get('fw', 0)) / 100) * 16603.48
         pa = (float(data.get('pa', 0)) / 100) * 15821.31
         pf = (float(data.get('pf', 0)) / 100) * 32763.28
@@ -22,37 +22,40 @@ def predict():
         w  = (float(data.get('w', 0)) / 100)  * 16920.80
         lr = (float(data.get('lr', 0)) / 100) * 29259.83
         
-        # 2. สุ่มค่า M (Moisture) ระหว่าง 50 ถึง 60 (ทศนิยม 2 ตำแหน่ง)
-        m_random = round(random.uniform(50, 60), 2)
+        # 2. สุ่มค่า M (Moisture) ระหว่าง 60 ถึง 65
+        m_random = round(random.uniform(60, 65), 2)
         
-        # 3. ส่งข้อมูลเข้า MATLAB (ต้องตรงกับชื่อในรูป image_32130f.png เป๊ะๆ)
-        # สังเกตชื่อ Key: 'E_fw', 'E_pa', 'E_pf', 'E_T', 'E_W', 'E_Lr', 'M'
+        # 3. ส่งข้อมูลเข้า MATLAB
         eng.workspace['input_data'] = eng.struct({
-            'E_fw': fw, 
-            'E_pa': pa, 
-            'E_pf': pf, 
-            'E_T':  t,   # ตัว T ใหญ่
-            'E_W':  w,   # ตัว W ใหญ่
-            'E_Lr': lr,  # ตัว L ใหญ่ r เล็ก
-            'M':    m_random # ส่งค่าที่สุ่มได้เข้าไปด้วย
+            'E_fw': fw, 'E_pa': pa, 'E_pf': pf, 
+            'E_T': t, 'E_W': w, 'E_Lr': lr, 'M': m_random
         })
         eng.eval("T = struct2table(input_data)", nargout=0)
         
-        # 4. โหลดและรันโมเดล (ต้อง Export Model มาเป็นไฟล์ .mat ก่อนนะ)
+        # 4. โหลดโมเดล
         eng.eval("S = load('RegressionLearnerSession2.mat')", nargout=0)
         eng.eval("names = fieldnames(S); modelVar = S.(names{1});", nargout=0)
         
+        # 5. สั่งคำนวณ
         result = eng.eval("modelVar.predictFcn(T)", nargout=1)
+        hhv_value = float(result)
+
+        # ==========================================
+        # ส่วนที่เพิ่ม: แสดงค่าใน Terminal
+        # ==========================================
+        print("\n" + "="*30)
+        print(f" ผลการคำนวณ HHV: {hhv_value:.2f} kJ/kg")
+        print(f" ค่าความชื้น (M) ที่ใช้: {m_random}%")
+        print("="*30 + "\n")
         
-        # ส่งค่ากลับไปพร้อมโชว์ค่า M ที่สุ่มได้ (ถ้าต้องการ)
         return jsonify({
             'success': True, 
-            'hhv': float(result),
+            'hhv': hhv_value,
             'random_m': m_random 
         })
 
     except Exception as e:
-        print(f"Error logic: {str(e)}")
+        print(f" Error logic: {str(e)}")
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
