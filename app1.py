@@ -43,6 +43,14 @@ def predict():
         
         # 5. สั่งคำนวณ
         result = eng.eval("modelVar.predictFcn(T)", nargout=1)
+
+        # ==========================================
+        # ส่วนที่เพิ่ม: แสดงค่าใน Terminal
+        # ==========================================
+        print("\n" + "="*30)
+        print(f" ผลการคำนวณ HHV: {hhv_value:.2f} kJ/kg")
+        print("="*30 + "\n")
+
         
         return jsonify({
             'success': True, 

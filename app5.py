@@ -21,8 +21,8 @@ def predict():
         w  = (float(data.get('w', 0)) / 100)  * 16920.80
         lr = (float(data.get('lr', 0)) / 100) * 29259.83
         
-        # 2. กำหนดค่า M (Moisture) เป็น 62.89384 ตามที่สั่ง
-        m_val = 62.89384
+        # 2. กำหนดค่า M (Moisture) เป็น 66.45 ตามที่สั่ง
+        m_val = 66.45
         
         # 3. ส่งข้อมูลเข้า MATLAB (ใช้ชื่อตัวแปรตามรูป image_32130f.png เป๊ะๆ)
         # ต้องมีครบ 7 ตัว (E_fw, E_pa, E_pf, E_T, E_W, E_Lr และ M)
@@ -33,7 +33,7 @@ def predict():
             'E_T':  t,   # ตัว T ใหญ่
             'E_W':  w,   # ตัว W ใหญ่
             'E_Lr': lr,  # ตัว L ใหญ่ r เล็ก
-            'M':    m_val # ค่าความชื้น 65.05
+            'M':    m_val # ค่าความชื้น 66.45
         })
         eng.eval("T = struct2table(input_data)", nargout=0)
         
