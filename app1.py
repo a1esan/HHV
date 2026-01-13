@@ -20,9 +20,9 @@ def predict():
         t  = (float(data.get('t', 0)) / 100)  * 21733.86
         w  = (float(data.get('w', 0)) / 100)  * 16920.80
         lr = (float(data.get('lr', 0)) / 100) * 29259.83
-        m  = (float(data.get('m', 0)) / 100)
+        m  = (float(data.get('m', 0)) / 1)
         
-        # . ส่งข้อมูลเข้า MATLAB (ใช้ชื่อตัวแปรตามรูป image_32130f.png เป๊ะๆ)
+        # . ส่งข้อมูลเข้า MATLAB 
         # 2.ต้องมีครบ 7 ตัว (E_fw, E_pa, E_pf, E_T, E_W, E_Lr และ M)
         eng.workspace['input_data'] = eng.struct({
             'E_fw': fw, 
