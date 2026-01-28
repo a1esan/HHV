@@ -393,16 +393,16 @@
     <div class="new-calc-row">
         <div class="input-group">
             <label>New Moisture (%wt)</label>
-            <input type="number" id="new_input" class="input-box" >
+            <input type="number" id="new_m" class="input-box" >
         </div>
 
-        <button class="btn-calculate small-btn" onclick="startNewCalculation()">
+        <button class="btn-calculate small-btn" onclick="calculateNewHHV()">
             Calculate New HHV
         </button>
 
         <div class="input-group">
             <label>New HHV as received (kJ/kg)</label>
-            <div id="new_display" class="output-box small-output">0</div>
+            <div id="new_hhv_display" class="output-box small-output">0</div>
         </div>
     </div>
 </div>
@@ -543,8 +543,7 @@ async function startCalculation() {
         alert("เชื่อมต่อ Backend ไม่ได้! เช็คว่ารัน ngrok หรือยัง?");
         document.getElementById('display_hhv').innerText = "0";
     }
-}
-
+ }
 // --- ฟังก์ชันคำนวณ HHV ใหม่ตามความชื้นที่เปลี่ยนไป (วางต่อท้ายสุด) ---
 function calculateNewHHV() {
     // 1. ดึงค่า HHV เดิมจากหน้าจอ (ที่คำนวณเสร็จแล้วจากชุดแรก)
