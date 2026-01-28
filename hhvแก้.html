@@ -393,7 +393,7 @@
     <div class="new-calc-row">
         <div class="input-group">
             <label>New Moisture (%wt)</label>
-            <input type="number" id="new_input" class="input-box" >
+            <input type="number" id="new_m" class="input-box" >
         </div>
 
         <button class="btn-calculate small-btn" onclick="startNewCalculation()">
@@ -543,6 +543,42 @@ async function startCalculation() {
         alert("เชื่อมต่อ Backend ไม่ได้! เช็คว่ารัน ngrok หรือยัง?");
         document.getElementById('display_hhv').innerText = "0";
     }
+
+}
+
+// --- ฟังก์ชันคำนวณ HHV ใหม่ตามความชื้นที่เปลี่ยนไป (วางต่อท้ายสุด) ---
+function calculateNewHHV() {
+    // 1. ดึงค่า HHV เดิมจากหน้าจอ (ที่คำนวณเสร็จแล้วจากชุดแรก)
+    const hhv_old = parseFloat(document.getElementById('display_hhv').innerText);
+    
+    // 2. ดึงค่า Moisture เดิม (จากช่อง input_m ช่องที่ 12)
+    const m_old_percent = parseFloat(document.getElementById('input_m').value);
+    
+    // 3. ดึงค่า Moisture ใหม่ (จากช่องใหม่ที่เราจะสร้างด้านล่าง)
+    const m_new_percent = parseFloat(document.getElementById('new_m').value);
+
+    // เช็คก่อนว่าคำนวณอันแรกหรือยัง
+    if (isNaN(hhv_old) || hhv_old === 0) {
+        alert("กรุณากดปุ่ม Calculate HHV ด้านบนให้เรียบร้อยก่อนครับ");
+        return;
+    }
+    if (isNaN(m_new_percent)) {
+        alert("กรุณากรอกเปอร์เซ็นต์ความชื้นใหม่ที่ต้องการคำนวณ");
+        return;
+    }
+
+    // สูตรคำนวณ: (HHV_old / (1 - M_old)) * (1 - M_new)
+    // แปลง % เป็นทศนิยมโดยหาร 100
+    const m_old = m_old_percent / 100;
+    const m_new = m_new_percent / 100;
+
+    const result = (hhv_old / (1 - m_old)) * (1 - m_new);
+
+    // แสดงผลลัพธ์ในกล่องใหม่
+    document.getElementById('new_hhv_display').innerText = result.toLocaleString(undefined, {
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+    });
 }
 </script>
 
