@@ -489,7 +489,7 @@ async function startCalculation() {
     // --- ส่วนที่เพิ่มใหม่: เช็คผลรวมก่อนเริ่ม ---
     const currentTotal = calculateCurrentTotal();
     if (Math.abs(currentTotal - 100) > 0.01) {
-        alert("ผลรวมส่วนประกอบต้องเท่ากับ 100% (ตอนนี้ได้: " + currentTotal.toFixed(2) + "%)");
+        alert("Total composition must equal 100% (Current: " + currentTotal.toFixed(2) + "%)");
         return;
     }
     // ---------------------------------------
@@ -510,7 +510,7 @@ async function startCalculation() {
 
     // ถ้าลืมกรอกข้อมูลให้เตือน (เพิ่มให้ครบทุกช่อง)
     if(!fw || !pa || !pf || !t || !w || !lr || !shell || !glass || !metal || !stone || !other || !m) {
-        alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (ใส่ 0 หากไม่มี)");
+        alert("Please fill in all fields (Enter 0 if none).");
         return;
     }
 
@@ -540,7 +540,7 @@ async function startCalculation() {
         }
     } catch (error) {
         console.error(error);
-        alert("เชื่อมต่อ Backend ไม่ได้! เช็คว่ารัน ngrok หรือยัง?");
+        alert("Cannot connect to the backend! Please check if ngrok is running.");
         document.getElementById('display_hhv').innerText = "0";
     }
  }
@@ -557,11 +557,11 @@ function calculateNewHHV() {
 
     // เช็คก่อนว่าคำนวณอันแรกหรือยัง
     if (isNaN(hhv_old) || hhv_old === 0) {
-        alert("กรุณากดปุ่ม Calculate HHV ด้านบนให้เรียบร้อยก่อนครับ");
+        alert("Please complete the primary HHV calculation first.");
         return;
     }
     if (isNaN(m_new_percent)) {
-        alert("กรุณากรอกเปอร์เซ็นต์ความชื้นใหม่ที่ต้องการคำนวณ");
+        alert("Please enter the new moisture content.");
         return;
     }
 
@@ -578,7 +578,7 @@ function calculateNewHHV() {
         maximumFractionDigits: 2
     });
 }
-</script>
+</script> 
 
 </body>
 </html>
