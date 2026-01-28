@@ -462,7 +462,7 @@
 
 // ฟังก์ชันใหม่: ใช้รวมค่าจากทุกช่องที่มีเลข
 function calculateCurrentTotal() {
-    const ids = ['fw', 'pa', 'pf', 't', 'w', 'lr', 'shell', 'glass', 'metal', 'stone', 'other', 'm'];
+    const ids = ['fw', 'pa', 'pf', 't', 'w', 'lr', 'shell', 'glass', 'metal', 'stone', 'other'];
     let total = 0;
     ids.forEach(id => {
         const val = parseFloat(document.getElementById('input_' + id).value) || 0;
