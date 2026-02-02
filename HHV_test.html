@@ -486,12 +486,60 @@ document.addEventListener('input', function(e) {
 });
 
 async function startCalculation() {
-    // --- ส่วนที่เพิ่มใหม่: เช็คผลรวมก่อนเริ่ม ---
+    // 1. ดึงค่าจากช่อง input ทั้งหมดมาก่อน
+    const getValue = (id) => document.getElementById('input_' + id).value;
+    
+    const fields = ['fw', 'pa', 'pf', 't', 'w', 'lr', 'shell', 'glass', 'metal', 'stone', 'other', 'm'];
+    const values = {};
+    let hasEmpty = false;
+
+    // ตรวจสอบว่ามีช่องไหนว่าง (ลืมกรอก) หรือไม่
+    for (let id of fields) {
+        const val = getValue(id);
+        if (val === "") {
+            hasEmpty = true;
+            break;
+        }
+        values[id] = parseFloat(val);
+    }
+
+    // --- ส่วนที่เพิ่มใหม่: เตือนให้กรอกให้ครบทุกช่องก่อน ---
+    if (hasEmpty) {
+        alert("Please fill in all composition fields (Enter 0 if none).");
+        return;
+    }
+
+    // --- 2. เช็คผลรวม 11 ช่องแรก (ต้องได้ 100%) ---
     const currentTotal = calculateCurrentTotal();
     if (Math.abs(currentTotal - 100) > 0.01) {
         alert("Total composition must equal 100% (Current: " + currentTotal.toFixed(2) + "%)");
         return;
     }
+
+    // 3. เริ่มขั้นตอนส่งข้อมูลไป Backend
+    document.getElementById('display_hhv').innerText = "...";
+
+    try {
+        const response = await fetch('https://quietistic-kamden-unlibidinously.ngrok-free.dev/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(values) // ส่ง values ที่เราวนลูปเก็บไว้ด้านบน
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('display_hhv').innerText = data.hhv.toFixed(2);
+        } else {
+            alert("Error: " + data.error);
+            document.getElementById('display_hhv').innerText = "0";
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Cannot connect to the backend! Please check if ngrok is running.");
+        document.getElementById('display_hhv').innerText = "0";
+    }
+    
     // ---------------------------------------
 
     // 1. ดึงค่าจากช่อง input (เหมือนเดิมของคุณ)
