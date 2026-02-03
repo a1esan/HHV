@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WIRC-MSW Model ยังไม่เอาจริง</title>
+<title>WIRC-MSW Model</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -216,44 +216,6 @@
     border-radius: 8px;
   }
 
-  /* --- CSS สำหรับวางตัวเลขบนรูปภาพ --- */
-
-.diagram-container {
-  position: relative; /* เป็นจุดอ้างอิงให้ตัวเลข */
-  display: inline-block; /* ให้กรอบพอดีกับรูป */
-  width: 100%;
-  max-width: 600px; /* คุมขนาดรูปไม่ให้ใหญ่เกิน */
-}
-
-.diagram-img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* สไตล์ของตัวเลขที่จะไปโผล่ในกล่อง */
-.overlay-number {
-  position: absolute;
-  /* background-color: rgba(255, 0, 0, 0.2);  <-- ถ้าจะเช็คตำแหน่ง ให้เอาบรรทัดนี้ออกจะเห็นสีแดงจางๆ */
-  color: #003366;      /* สีตัวเลข (น้ำเงินเข้ม) */
-  font-weight: bold;
-  font-size: 1.2rem;   /* ขนาดตัวเลข */
-  width: 15%;          /* ความกว้างพื้นที่ตัวเลข (กะประมาณเอา) */
-  text-align: center;  /* จัดกึ่งกลาง */
-}
-
-/* ปรับตำแหน่งกล่องบน (Secondary Air) */
-.pos-top {
-  top: 32%;   /* ห่างจากขอบบน 38% (ลองปรับเลขนี้ถ้าไม่ตรง) */
-  right: 10%; /* ห่างจากขอบขวา 18% */
-}
-
-/* ปรับตำแหน่งกล่องล่าง (Primary Air) */
-.pos-bottom {
-  bottom: 26%; /* ห่างจากขอบล่าง 23% (ลองปรับเลขนี้ถ้าไม่ตรง) */
-  right: 8%;  /* ห่างจากขอบขวา 18% */
-}
-
   /* --- Summary Page --- */
   .sum-list { list-style: none; padding: 0; }
   .sum-item {
@@ -301,73 +263,6 @@
   }
   .menu-links a:hover { background-color: rgba(255,255,255,0.1); color: var(--accent-yellow); border-color: white; }
 
-  /* --- ส่วน CSS ที่เพิ่มใหม่สำหรับ Diagram --- */
-.result-section-hidden {
-  display: none; /* ซ่อนไว้ก่อน จะโชว์เมื่อกดคำนวณ */
-  margin-top: 30px;
-  animation: fadeIn 0.5s;
-}
-
-.result-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  align-items: flex-start;
-}
-
-.result-table-col {
-  flex: 1;
-  min-width: 300px;
-}
-
-.result-image-col {
-  flex: 1;
-  min-width: 300px;
-  position: relative; /* เพื่อให้วางกล่องตัวเลขทับได้ */
-  display: flex;
-  justify-content: center;
-}
-
-.diagram-container {
-  position: relative;
-  width: 100%;
-  max-width: 500px; /* ปรับขนาดรูปสูงสุดตามต้องการ */
-}
-
-.diagram-img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* กล่องตัวเลขที่ลอยอยู่บนรูป */
-.overlay-box {
-  position: absolute;
-  background-color: white;
-  border: 1px solid #333;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-weight: bold;
-  color: var(--primary-blue);
-  min-width: 60px;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  font-size: 0.9rem;
-}
-
-/* ตำแหน่งกล่อง (ต้องปรับ % ตามรูปจริงของคุณ) */
-/* กล่อง Secondary Air (ด้านบน) */
-.pos-sec {
-  top: 35%;  /* ปรับตำแหน่งแนวตั้ง */
-  right: 5%; /* ปรับตำแหน่งแนวนอน */
-}
-
-/* กล่อง Primary Air (ด้านล่าง) */
-.pos-pri {
-  bottom: 20%; /* ปรับตำแหน่งแนวตั้ง */
-  right: 5%;   /* ปรับตำแหน่งแนวนอน */
-}
-
   /* --- Footer --- */
   main { flex: 1; padding: 20px; }
   
@@ -412,7 +307,6 @@
     border-top: 1px solid rgba(255,255,255,0.05);
   }
 </style>
-<!-- จบ CSS -->
 </head>
 <body>
 
@@ -457,60 +351,27 @@
   <main>
     <div class="app-container">
       <nav class="sidebar">
-        <div class="nav-btn active" onclick="goToPage(1)">1. Combustion Air Quantity</div>
-        <div class="nav-btn" onclick="goToPage(2)">2. Exhaust Gas Generation</div>
-        <div class="nav-btn" onclick="goToPage(3)">3. Combustion Temperature</div>
-        <div class="nav-btn" onclick="goToPage(4)">4. Steam Generation Rate</div>
-        <div class="nav-btn" onclick="goToPage(7)">5. Turbine/Gen</div>
-        <div class="nav-btn" onclick="goToPage('sum')" style="margin-top: 10px; border-color: var(--primary-blue); color: var(--primary-blue);">6. Summary</div>
+        <div class="nav-btn active" onclick="goToPage(1)">1. ปริมาณอากาศ</div>
+        <div class="nav-btn" onclick="goToPage(2)">2. ปริมาณก๊าซไอเสีย</div>
+        <div class="nav-btn" onclick="goToPage(3)">3. อุณหภูมิเผาไหม้</div>
+        <div class="nav-btn" onclick="goToPage(4)">4. อัตราผลิตไอน้ำ</div>
+        <div class="nav-btn" onclick="goToPage(5)">5. พลังงานไฟฟ้า</div>
+        <div class="nav-btn" onclick="goToPage(6)">6. Boiler</div>
+        <div class="nav-btn" onclick="goToPage(7)">7. Turbine/Gen</div>
+        <div class="nav-btn" onclick="goToPage('sum')" style="margin-top: 10px; border-color: var(--primary-blue); color: var(--primary-blue);">Summary</div>
       </nav>
 
       <div class="content-area">
-        <!-- เริ่มส่วนที่1 -->
+        
         <div id="page-1" class="page-section active">
-          <h3 class="section-title">Combustion Air Quantity</h3>
-          
-          <div class="custom-table">
-            <div class="ct-section">Design criteria</div>
-            <div class="ct-row">
-              <div class="ct-blue left-align">Amount of Solid Waste</div>
-              <div class="ct-blue">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-blue">Ton/day</div>
-            </div>
-            <div class="ct-row">
-              <div class="ct-blue left-align">Secondary Air Ratio</div>
-              <div class="ct-blue">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-blue">%</div>
-            </div>
-          </div>
-
-          <button class="btn-calc" onclick="calculate(1)">คำนวณ (Calculate)</button>
-          
-          <div class="result-box">สถานะ: <span id="status-text">กรุณากดคำนวณ</span></div>
-
-          <div id="result-image-box" style="display: none; margin-top: 30px; text-align: center;">
-            
-            <h4 style="color: var(--primary-blue);">ผลลัพธ์การคำนวณ</h4>
-
-            <div class="diagram-container">
-              <img src="image/Airflow (2).png" class="diagram-img" alt="Diagram">
-              
-              <div id="box-val-sec" class="overlay-number pos-top">0</div>
-
-              <div id="box-val-pri" class="overlay-number pos-bottom">0</div>
-            </div>
-
-          </div>
-        </div>
-        <!-- จบส่วนที่ 1 -->
-
-        <!-- เริ่มส่วนที่ 2 -->
-         <div id="page-2" class="page-section">
           <h3 class="section-title">ปริมาณอากาศที่ใช้ในการเผาไหม้</h3>
-          
           <div class="custom-table">
+            <div class="ct-row">
+              <div class="ct-header">รายการ</div>
+              <div class="ct-header">สัญลักษณ์</div>
+              <div class="ct-header">ค่าที่ได้</div>
+              <div class="ct-header">หน่วย</div>
+            </div>
             <div class="ct-section">เกณฑ์ในการออกแบบ</div>
             <div class="ct-row">
               <div class="ct-blue left-align">Amount of Solid Waste</div>
@@ -519,34 +380,82 @@
               <div class="ct-blue">Ton/day</div>
             </div>
             <div class="ct-row">
-              <div class="ct-blue left-align">Secondary Air Ratio</div>
+              <div class="ct-blue left-align">HHV of waste</div>
               <div class="ct-blue">X</div>
               <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-blue">%</div>
+              <div class="ct-blue"></div>
             </div>
-          </div>
+            <div class="ct-row">
+              <div class="ct-blue left-align">Moisture</div>
+              <div class="ct-blue">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-blue"></div>
+            </div>
+            <div class="ct-row">
+              <div class="ct-blue left-align">Excess Air Amount</div>
+              <div class="ct-blue">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-blue"></div>
+            </div>
+            <div class="ct-row">
+              <div class="ct-blue left-align">Primary Air</div>
+              <div class="ct-blue">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-blue"></div>
+            </div>
+            <div class="ct-row">
+              <div class="ct-blue left-align">Secondary Air</div>
+              <div class="ct-blue">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-blue"></div>
+            </div>
 
-          <button class="btn-calc" onclick="calculate(1)">คำนวณ (Calculate)</button>
+            <div class="ct-section" style="margin-top: 10px;">มวลของอากาศที่ต้องใช้ในการเผาไหม้เชื้อเพลิง</div>
+            <div class="ct-row">
+              <div class="ct-yellow left-align">มวลของอากาศที่ต้องใช้ในการเผาไหม้เชื้อเพลิง</div><div class="ct-yellow">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-yellow"></div>
+            </div>
+            <div class="ct-row">
+              <div class="ct-yellow left-align">มวลของอากาศปฐมภูมิ</div><div class="ct-yellow">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-yellow"></div>
+            </div>
+            <div class="ct-row">
+              <div class="ct-yellow left-align">มวลของอากาศทุติยภูมิ</div><div class="ct-yellow">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-yellow"></div>
+            </div>
+            <div class="ct-section" style="margin-top: 10px;">Volumetric Flow Rate of Combustion Air</div>
+            <div class="ct-row">
+              <div class="ct-yellow left-align">equired Combustion Air Flow</div><div class="ct-yellow">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-yellow"></div>
+            </div>
+            <div class="ct-row">
+              <div class="ct-yellow left-align">Primary Air Flow Rate</div><div class="ct-yellow">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-yellow"></div>
+            </div>
+            <div class="ct-row">
+              <div class="ct-yellow left-align">Secondary Air Flow Rate</div><div class="ct-yellow">X</div>
+              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
+              <div class="ct-yellow"></div>
+            </div>
+             
           
-          <div class="result-box">สถานะ: <span id="status-text">กรุณากดคำนวณ</span></div>
+          <button class="btn-calc" onclick="calculate(1)">คำนวณ (Calculate)</button>
+          <div class="result-box">ผลลัพธ์: <span id="res-1">0</span></div>
+        </div>
 
-          <div id="result-image-box" style="display: none; margin-top: 30px; text-align: center;">
-            
-            <h4 style="color: var(--primary-blue);">ผลลัพธ์การคำนวณ</h4>
+        <div id="page-2" class="page-section">
+          <h3 class="section-title">ส่วนที่ 2: ปริมาณก๊าซไอเสียที่เกิด</h3>
+          <div class="input-group"><label>ค่า B1:</label><input type="number" class="inp-2" placeholder="0"></div>
+          <div class="input-group"><label>ค่า B2:</label><input type="number" class="inp-2" placeholder="0"></div>
+          <button class="btn-calc" onclick="calculate(2)">คำนวณ (Calculate)</button>
+          <div class="result-box">ผลลัพธ์: <span id="res-2">0</span></div>
+        </div>
 
-            <div class="diagram-container">
-              <img src="image/Airflow (2).png" class="diagram-img" alt="Diagram">
-              
-              <div id="box-val-sec" class="overlay-number pos-top">0</div>
-
-              <div id="box-val-pri" class="overlay-number pos-bottom">0</div>
-            </div>
-
-          </div>
-        </div> 
-        <!-- จบส่วนที่ 2 -->
-
-        <!-- เริ่มส่วนที่ 3 -->
         <div id="page-3" class="page-section">
           <h3 class="section-title">ส่วนที่ 3: อุณหภูมิของกระบวนการเผาไหม้</h3>
           <div class="input-group"><label>ค่า C1:</label><input type="number" class="inp-3" placeholder="0"></div>
@@ -554,7 +463,6 @@
           <button class="btn-calc" onclick="calculate(3)">คำนวณ (Calculate)</button>
           <div class="result-box">ผลลัพธ์: <span id="res-3">0</span></div>
         </div>
-        <!-- จบส่วนที่ 3 -->
 
         <div id="page-4" class="page-section">
           <h3 class="section-title">ส่วนที่ 4: อัตราการผลิตไอน้ำ</h3>
@@ -642,100 +550,92 @@
     </div>
   </footer>
 
-  <!-- javascript -->
   <script>
-    // --- ฟังก์ชัน 1: สำหรับเปลี่ยนหน้า (Tab) ---
-    function goToPage(pageIndex) {
-      // 1. ซ่อนทุกหน้าก่อน
-      document.querySelectorAll('.page-section').forEach(page => {
-        page.classList.remove('active');
-      });
+    // 1. ตัวแปรเก็บค่าผลลัพธ์แต่ละหน้า (Global Variable)
+    let pageResults = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
 
-      // 2. เอาไฮไลท์ออกจากปุ่มเมนูทั้งหมด
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-
-      // 3. แสดงหน้าเป้าหมาย
-      const targetPage = document.getElementById('page-' + pageIndex);
-      if (targetPage) {
-        targetPage.classList.add('active');
-      }
-
-      // 4. ไฮไลท์ปุ่มที่กด (คำนวณลำดับปุ่ม)
-      const buttons = document.querySelectorAll('.nav-btn');
-      let btnIndex = -1;
+    // 2. ฟังก์ชันสลับหน้า (Link กับปุ่มเมนูซ้ายมือ)
+    function goToPage(pageId) {
+      // ลบคลาส active จากปุ่มทั้งหมด
+      const navButtons = document.querySelectorAll('.sidebar .nav-btn');
+      navButtons.forEach(btn => btn.classList.remove('active'));
       
-      if (pageIndex === 'sum') {
-        // ถ้าเป็นหน้า Summary คือปุ่มสุดท้าย
-        btnIndex = buttons.length - 1;
+      // ซ่อนทุก Section
+      const sections = document.querySelectorAll('.page-section');
+      sections.forEach(sec => sec.classList.remove('active'));
+
+      // แสดง Section ที่เลือก
+      const targetSection = document.getElementById('page-' + pageId);
+      if (targetSection) {
+        targetSection.classList.add('active');
+      }
+
+      // ไฮไลท์ปุ่มเมนูที่เลือก
+      let indexToCheck = -1;
+      if(pageId === 'sum') {
+        indexToCheck = navButtons.length - 1; // ปุ่มสุดท้าย
       } else {
-        // ถ้าเป็นตัวเลข ให้ลบ 1 เพราะ index เริ่มที่ 0
-        btnIndex = parseInt(pageIndex) - 1;
+        indexToCheck = pageId - 1; // Index เริ่มที่ 0
       }
 
-      if (buttons[btnIndex]) {
-        buttons[btnIndex].classList.add('active');
+      if(navButtons[indexToCheck]) {
+        navButtons[indexToCheck].classList.add('active');
       }
 
-      // ถ้าเปิดบนมือถือ ให้ปิดเมนูหลังจากกดเลือก
-      if(window.innerWidth <= 800) {
-        toggleMenu();
-      }
+      // ถ้าเป็นหน้า Sum ให้ render ข้อมูลใหม่
+      if(pageId === 'sum') renderSumPage();
     }
 
-    // --- ฟังก์ชัน 2: เปิด/ปิด เมนูมือถือ (Hamburger) ---
-    function toggleMenu() {
-      const menu = document.getElementById('sideMenu');
-      const overlay = document.getElementById('menuOverlay');
-      
-      // เช็คว่ามี class 'active' อยู่ไหม
-      if (menu.classList.contains('active')) {
-        menu.classList.remove('active');
-        overlay.classList.remove('active');
-      } else {
-        menu.classList.add('active');
-        overlay.classList.add('active');
-      }
-    }
-
-    // --- ฟังก์ชัน 3: คำนวณ (Calculate) ---
+    // 3. ฟังก์ชันคำนวณ (Mockup: รวมค่า Input ในหน้านั้น)
     function calculate(pageIndex) {
-      // 1. ดึงค่าจากช่อง input ในหน้านั้นๆ มาบวกกัน
+      // ดึง Input ตาม Class ของหน้านั้นๆ (เช่น inp-1) มาบวกกัน
       let inputs = document.querySelectorAll(`.inp-${pageIndex}`);
       let sum = 0;
+      
       inputs.forEach(input => {
         let val = parseFloat(input.value);
         if(!isNaN(val)) sum += val;
       });
       
-      // 2. ถ้าเป็นหน้า 1 (Page 1) มีเงื่อนไขพิเศษ: โชว์รูปภาพและตัวเลข
-      if(pageIndex === 1) {
-        // เปลี่ยนข้อความสถานะ
-        let statusText = document.getElementById('status-text');
-        if(statusText) {
-          statusText.innerText = "คำนวณเสร็จสิ้น (ดูตัวเลขในภาพ)";
-          statusText.style.color = "green";
-        }
+      // บันทึกค่าลงตัวแปรกลาง
+      pageResults[pageIndex] = sum;
+      
+      // แสดงผลในหน้านั้น
+      const resultSpan = document.getElementById(`res-${pageIndex}`);
+      if(resultSpan) resultSpan.innerText = sum.toLocaleString();
+    }
 
-        // เปิดรูปภาพขึ้นมา
-        let imgBox = document.getElementById('result-image-box');
-        if(imgBox) imgBox.style.display = 'block';
+    // 4. ฟังก์ชันแสดงหน้าสรุปผล
+    function renderSumPage() {
+      let container = document.getElementById('sum-list-container');
+      container.innerHTML = ''; // เคลียร์ของเก่า
+      let grandTotal = 0;
 
-        // *** เอาเลขไปใส่ในกล่องบนภาพ ***
-        // ตัวอย่าง: เอาผลรวมไปใส่กล่องล่าง (Primary)
-        let boxPri = document.getElementById('box-val-pri');
-        if(boxPri) boxPri.innerText = sum.toLocaleString(); 
+      // วนลูปดึงค่าจากหน้าที่ 1-7
+      for(let i=1; i<=7; i++) {
+        let val = pageResults[i];
+        grandTotal += val;
         
-        // ตัวอย่าง: เอาผลรวมหาร 2 ไปใส่กล่องบน (Secondary)
-        let boxSec = document.getElementById('box-val-sec');
-        if(boxSec) boxSec.innerText = (sum / 2).toLocaleString(); 
+        // สร้าง HTML list item
+        let html = `
+          <li class="sum-item">
+            <span class="sum-label">ผลลัพธ์ส่วนที่ ${i}</span>
+            <span class="sum-value" style="font-weight:bold;">+ ${val.toLocaleString()}</span>
+          </li>
+        `;
+        container.innerHTML += html;
       }
-      else {
-        // หน้าอื่นๆ โชว์ผลลัพธ์ที่ span ปกติ
-        let resSpan = document.getElementById(`res-${pageIndex}`);
-        if(resSpan) resSpan.innerText = sum.toLocaleString();
-      }
+      
+      // แสดงยอดรวม
+      document.getElementById('grand-total-display').innerText = grandTotal.toLocaleString();
+    }
+
+    // 5. ฟังก์ชันสำหรับเมนูมือถือ
+    function toggleMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('menuOverlay');
+      menu.classList.toggle('active');
+      overlay.classList.toggle('active');
     }
   </script>
 
