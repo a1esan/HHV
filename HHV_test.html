@@ -397,19 +397,23 @@
     <h3 style="color: var(--primary-blue);">Adjusting for New Moisture Content</h3>
     
     <div class="new-calc-row">
-        <div class="input-group">
-            <label>New Moisture (%wt)</label>
-            <input type="number" id="new_m" class="input-box" >
-        </div>
+    <div class="input-group">
+        <label>New Moisture (%wt)</label>
+        <input type="number" id="new_m" class="input-box">
+    </div>
 
-        <button class="btn-calculate small-btn" onclick="calculateNewHHV()">
-            Calculate New HHV
-        </button>
+    <button class="btn-calculate small-btn" onclick="calculateNewHHV()">
+        Calculate New HHV
+    </button>
 
-        <div class="input-group">
-            <label>New HHV as received (kJ/kg)</label>
-            <div id="new_hhv_display" class="output-box small-output">0</div>
-        </div>
+    <div class="input-group">
+        <label>New HHV as received (kJ/kg)</label>
+        <div id="new_hhv_display" class="output-box small-output">0</div>
+    </div>
+
+    <div class="input-group">
+        <label>New HHV dry basis (kJ/kg)</label>
+        <div id="new_hhv_db_display" class="output-box small-output" style="background-color: #D3D3D3;">0</div>
     </div>
 </div>
 
@@ -545,7 +549,7 @@ async function startCalculation() {
         alert("Cannot connect to the backend! Please check if ngrok is running.");
         document.getElementById('display_hhv').innerText = "0";
     }
-    
+
 // ... ภายในฟังก์ชัน startCalculation() ตรงที่รับ data สำเร็จ ...
 
 if (data.success) {
@@ -615,16 +619,14 @@ if (data.success) {
  }
 // --- ฟังก์ชันคำนวณ HHV ใหม่ตามความชื้นที่เปลี่ยนไป (วางต่อท้ายสุด) ---
 function calculateNewHHV() {
-    // 1. ดึงค่า HHV เดิมจากหน้าจอ (ที่คำนวณเสร็จแล้วจากชุดแรก)
+    // 1. ดึงค่า HHV เดิม (As Received) จากการคำนวณครั้งแรก
     const hhv_old = parseFloat(document.getElementById('display_hhv').innerText);
-    
-    // 2. ดึงค่า Moisture เดิม (จากช่อง input_m ช่องที่ 12)
+    // 2. ดึงค่าความชื้นเดิม
     const m_old_percent = parseFloat(document.getElementById('input_m').value);
-    
-    // 3. ดึงค่า Moisture ใหม่ (จากช่องใหม่ที่เราจะสร้างด้านล่าง)
+    // 3. ดึงค่าความชื้นใหม่
     const m_new_percent = parseFloat(document.getElementById('new_m').value);
 
-    // เช็คก่อนว่าคำนวณอันแรกหรือยัง
+    // ตรวจสอบความพร้อมของข้อมูล
     if (isNaN(hhv_old) || hhv_old === 0) {
         alert("Please complete the primary HHV calculation first.");
         return;
@@ -634,15 +636,26 @@ function calculateNewHHV() {
         return;
     }
 
-    // สูตรคำนวณ: (HHV_old / (1 - M_old)) * (1 - M_new)
-    // แปลง % เป็นทศนิยมโดยหาร 100
+    // แปลง % เป็นทศนิยม
     const m_old = m_old_percent / 100;
     const m_new = m_new_percent / 100;
 
-    const result = (hhv_old / (1 - m_old)) * (1 - m_new);
+    // คำนวณค่า Dry Basis (ซึ่งค่านี้จะคงที่ ไม่ว่าความชื้นจะเปลี่ยนไปเท่าไหร่)
+    const hhv_db = hhv_old / (1 - m_old);
 
-    // แสดงผลลัพธ์ในกล่องใหม่
-    document.getElementById('new_hhv_display').innerText = result.toLocaleString(undefined, {
+    // คำนวณค่า New As Received จากค่า Dry Basis
+    const hhv_new_ar = hhv_db * (1 - m_new);
+
+    // --- แสดงผลทั้ง 2 ช่อง ---
+    
+    // แสดง New As Received
+    document.getElementById('new_hhv_display').innerText = hhv_new_ar.toLocaleString(undefined, {
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+    });
+
+    // แสดง New Dry Basis (ซึ่งต้องเท่ากับค่า Dry Basis ของครั้งแรก)
+    document.getElementById('new_hhv_db_display').innerText = hhv_db.toLocaleString(undefined, {
         minimumFractionDigits: 2, 
         maximumFractionDigits: 2
     });
