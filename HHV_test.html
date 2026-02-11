@@ -381,9 +381,15 @@
 
 
       <div class="output-col">
-    <div class="input-group">
-        <label>HHV as received (kJ/kg)</label>
-        <div id="display_hhv" class="output-box">0</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;">
+        <div class="input-group">
+            <label>HHV as received (kJ/kg)</label>
+            <div id="display_hhv" class="output-box">0</div>
+        </div>
+        <div class="input-group">
+            <label>HHV dry basis (kJ/kg)</label>
+            <div id="display_hhv_db" class="output-box" style="background-color: #D3D3D3;">0</div>
+        </div>
     </div>
 </div>
 
@@ -539,7 +545,22 @@ async function startCalculation() {
         alert("Cannot connect to the backend! Please check if ngrok is running.");
         document.getElementById('display_hhv').innerText = "0";
     }
+    
+// ... ภายในฟังก์ชัน startCalculation() ตรงที่รับ data สำเร็จ ...
 
+if (data.success) {
+    const hhv_ar = data.hhv;
+    const moisture = parseFloat(document.getElementById('input_m').value) || 0;
+
+    // 1. แสดงค่า As Received (ที่ได้จากโมเดล)
+    document.getElementById('display_hhv').innerText = hhv_ar.toFixed(2);
+
+    // 2. คำนวณและแสดงค่า Dry Basis
+    // สูตร: HHV_db = HHV_ar / (1 - (M/100))
+    const hhv_db = hhv_ar / (1 - (moisture / 100));
+    
+    document.getElementById('display_hhv_db').innerText = isFinite(hhv_db) ? hhv_db.toFixed(2) : "0";
+}
     // ---------------------------------------
 
     // 1. ดึงค่าจากช่อง input (เหมือนเดิมของคุณ)
