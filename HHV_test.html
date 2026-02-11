@@ -496,14 +496,12 @@ document.addEventListener('input', function(e) {
 });
 
 async function startCalculation() {
-    // 1. ดึงค่าจากช่อง input ทั้งหมดมาก่อน
+    // 1. ดึงค่าจาก input ทั้งหมด
     const getValue = (id) => document.getElementById('input_' + id).value;
-    
     const fields = ['fw', 'pa', 'pf', 't', 'w', 'lr', 'shell', 'glass', 'metal', 'stone', 'other', 'm'];
     const values = {};
     let hasEmpty = false;
 
-    // ตรวจสอบว่ามีช่องไหนว่าง (ลืมกรอก) หรือไม่
     for (let id of fields) {
         const val = getValue(id);
         if (val === "") {
@@ -513,41 +511,53 @@ async function startCalculation() {
         values[id] = parseFloat(val);
     }
 
-    // --- ส่วนที่เพิ่มใหม่: เตือนให้กรอกให้ครบทุกช่องก่อน ---
     if (hasEmpty) {
         alert("Please fill in all composition fields (Enter 0 if none).");
         return;
     }
 
-    // --- 2. เช็คผลรวม 11 ช่องแรก (ต้องได้ 100%) ---
     const currentTotal = calculateCurrentTotal();
     if (Math.abs(currentTotal - 100) > 0.01) {
         alert("Total composition must equal 100% (Current: " + currentTotal.toFixed(2) + "%)");
         return;
     }
 
-    // 3. เริ่มขั้นตอนส่งข้อมูลไป Backend
+    // แสดงสถานะกำลังโหลด
     document.getElementById('display_hhv').innerText = "...";
+    document.getElementById('display_hhv_db').innerText = "...";
 
     try {
         const response = await fetch('https://quietistic-kamden-unlibidinously.ngrok-free.dev/predict', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(values) // ส่ง values ที่เราวนลูปเก็บไว้ด้านบน
+            body: JSON.stringify(values)
         });
 
         const data = await response.json();
 
         if (data.success) {
-            document.getElementById('display_hhv').innerText = data.hhv.toFixed(2);
+            const hhv_ar = data.hhv;
+            const moisture = values['m']; // ค่าความชื้นที่กรอก
+
+            // แสดงค่า As Received
+            document.getElementById('display_hhv').innerText = hhv_ar.toFixed(2);
+
+            // คำนวณค่า Dry Basis: HHV_db = HHV_ar / (1 - (M/100))
+            const hhv_db = hhv_ar / (1 - (moisture / 100));
+            
+            if (isFinite(hhv_db)) {
+                document.getElementById('display_hhv_db').innerText = hhv_db.toFixed(2);
+            } else {
+                document.getElementById('display_hhv_db').innerText = "Error";
+            }
         } else {
             alert("Error: " + data.error);
-            document.getElementById('display_hhv').innerText = "0";
         }
     } catch (error) {
         console.error(error);
-        alert("Cannot connect to the backend! Please check if ngrok is running.");
+        alert("Cannot connect to the backend!");
         document.getElementById('display_hhv').innerText = "0";
+        document.getElementById('display_hhv_db').innerText = "0";
     }
 
 // ... ภายในฟังก์ชัน startCalculation() ตรงที่รับ data สำเร็จ ...
