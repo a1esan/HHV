@@ -411,8 +411,44 @@
     color: #666;
     border-top: 1px solid rgba(255,255,255,0.05);
   }
+
+  /* สำหรับหน้าจอที่มีความกว้างน้อยกว่า 600px (เช่น โทรศัพท์มือถือ) */
+@media screen and (max-width: 600px) {
+  .grid-table {
+    display: flex;         /* เปลี่ยนจาก Grid เป็น Flexbox */
+    flex-direction: column; /* เรียงต่อกันเป็นแถวตอนลึก */
+    gap: 8px;              /* ระยะห่างระหว่างกล่อง */
+  }
+
+  .grid-cell {
+    width: 100%;           /* ให้กล่องขยายกว้างเต็มหน้าจอ */
+    justify-content: flex-start; /* จัดตัวหนังสือชิดซ้ายเพื่อให้อ่านง่าย */
+    padding: 12px;         /* เพิ่มพื้นที่จิ้มให้กว้างขึ้น */
+    font-size: 14px;       /* ปรับขนาดตัวอักษรให้พอดี */
+  }
+
+  /* ปรับแต่งส่วนที่เป็นหัวข้อ Design Criteria */
+  .bg-grey-section {
+    text-align: center;
+    font-size: 18px;
+  }
+
+  /* ซ่อนหัวข้อคอลัมน์ (Parameter, Symbol, Value, Unit) บนมือถือเพราะจะทำให้ลายตา */
+  .bg-header {
+    display: none; 
+  }
+
+  /* ปรับแต่ง Input ให้พิมพ์ง่ายขึ้นบนมือถือ */
+  .inner-input {
+    font-size: 16px;       /* ป้องกันไม่ให้ iOS ซูมหน้าจอเวลาแตะพิมพ์ */
+    padding: 8px;
+    background-color: white; /* ให้เห็นช่องพิมพ์ชัดเจน */
+    border-radius: 5px;
+  }
+}
 </style>
 <!-- จบ CSS -->
+ 
 </head>
 <body>
 
