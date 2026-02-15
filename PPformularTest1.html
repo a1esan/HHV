@@ -216,6 +216,44 @@
     border-radius: 8px;
   }
 
+  /* --- CSS สำหรับวางตัวเลขบนรูปภาพ --- */
+
+.diagram-container {
+  position: relative; /* เป็นจุดอ้างอิงให้ตัวเลข */
+  display: inline-block; /* ให้กรอบพอดีกับรูป */
+  width: 100%;
+  max-width: 600px; /* คุมขนาดรูปไม่ให้ใหญ่เกิน */
+}
+
+.diagram-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* สไตล์ของตัวเลขที่จะไปโผล่ในกล่อง */
+.overlay-number {
+  position: absolute;
+  /* background-color: rgba(255, 0, 0, 0.2);  <-- ถ้าจะเช็คตำแหน่ง ให้เอาบรรทัดนี้ออกจะเห็นสีแดงจางๆ */
+  color: #003366;      /* สีตัวเลข (น้ำเงินเข้ม) */
+  font-weight: bold;
+  font-size: 1.2rem;   /* ขนาดตัวเลข */
+  width: 15%;          /* ความกว้างพื้นที่ตัวเลข (กะประมาณเอา) */
+  text-align: center;  /* จัดกึ่งกลาง */
+}
+
+/* ปรับตำแหน่งกล่องบน (Secondary Air) */
+.pos-top {
+  top: 32%;   /* ห่างจากขอบบน 38% (ลองปรับเลขนี้ถ้าไม่ตรง) */
+  right: 10%; /* ห่างจากขอบขวา 18% */
+}
+
+/* ปรับตำแหน่งกล่องล่าง (Primary Air) */
+.pos-bottom {
+  bottom: 26%; /* ห่างจากขอบล่าง 23% (ลองปรับเลขนี้ถ้าไม่ตรง) */
+  right: 8%;  /* ห่างจากขอบขวา 18% */
+}
+
   /* --- Summary Page --- */
   .sum-list { list-style: none; padding: 0; }
   .sum-item {
@@ -263,6 +301,73 @@
   }
   .menu-links a:hover { background-color: rgba(255,255,255,0.1); color: var(--accent-yellow); border-color: white; }
 
+  /* --- ส่วน CSS ที่เพิ่มใหม่สำหรับ Diagram --- */
+.result-section-hidden {
+  display: none; /* ซ่อนไว้ก่อน จะโชว์เมื่อกดคำนวณ */
+  margin-top: 30px;
+  animation: fadeIn 0.5s;
+}
+
+.result-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.result-table-col {
+  flex: 1;
+  min-width: 300px;
+}
+
+.result-image-col {
+  flex: 1;
+  min-width: 300px;
+  position: relative; /* เพื่อให้วางกล่องตัวเลขทับได้ */
+  display: flex;
+  justify-content: center;
+}
+
+.diagram-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px; /* ปรับขนาดรูปสูงสุดตามต้องการ */
+}
+
+.diagram-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* กล่องตัวเลขที่ลอยอยู่บนรูป */
+.overlay-box {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #333;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: var(--primary-blue);
+  min-width: 60px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  font-size: 0.9rem;
+}
+
+/* ตำแหน่งกล่อง (ต้องปรับ % ตามรูปจริงของคุณ) */
+/* กล่อง Secondary Air (ด้านบน) */
+.pos-sec {
+  top: 35%;  /* ปรับตำแหน่งแนวตั้ง */
+  right: 5%; /* ปรับตำแหน่งแนวนอน */
+}
+
+/* กล่อง Primary Air (ด้านล่าง) */
+.pos-pri {
+  bottom: 20%; /* ปรับตำแหน่งแนวตั้ง */
+  right: 5%;   /* ปรับตำแหน่งแนวนอน */
+}
+
   /* --- Footer --- */
   main { flex: 1; padding: 20px; }
   
@@ -307,6 +412,7 @@
     border-top: 1px solid rgba(255,255,255,0.05);
   }
 </style>
+<!-- จบ CSS -->
 </head>
 <body>
 
@@ -323,7 +429,7 @@
               <a href="HHV_test.html" onclick="toggleMenu()">HHV Calculator</a>
               <a href="PPformularTest1.html" onclick="toggleMenu()">Power Plant Performance</a>
               <a href="manual.html" onclick="toggleMenu()">User Manual</a>
-              <a href="#" onclick="toggleMenu()">Contact Us</a>
+              <a href="#contact-section" onclick="toggleMenu()">Contact Us</a>
           </nav>
       </div>
   </div>
@@ -351,27 +457,213 @@
   <main>
     <div class="app-container">
       <nav class="sidebar">
-        <div class="nav-btn active" onclick="goToPage(1)">1. ปริมาณอากาศ</div>
-        <div class="nav-btn" onclick="goToPage(2)">2. ปริมาณก๊าซไอเสีย</div>
-        <div class="nav-btn" onclick="goToPage(3)">3. อุณหภูมิเผาไหม้</div>
-        <div class="nav-btn" onclick="goToPage(4)">4. อัตราผลิตไอน้ำ</div>
-        <div class="nav-btn" onclick="goToPage(5)">5. พลังงานไฟฟ้า</div>
-        <div class="nav-btn" onclick="goToPage(6)">6. Boiler</div>
-        <div class="nav-btn" onclick="goToPage(7)">7. Turbine/Gen</div>
-        <div class="nav-btn" onclick="goToPage('sum')" style="margin-top: 10px; border-color: var(--primary-blue); color: var(--primary-blue);">Summary</div>
+        <div class="nav-btn active" onclick="goToPage(1)">1. Combustion Air Quantity</div>
+        <div class="nav-btn" onclick="goToPage(2)">2. Exhaust Gas Generation</div>
+        <div class="nav-btn" onclick="goToPage(3)">3. Combustion Temperature</div>
+        <div class="nav-btn" onclick="goToPage(4)">4. Steam Generation Rate</div>
+        <div class="nav-btn" onclick="goToPage(7)">5. Turbine/Gen</div>
+        <div class="nav-btn" onclick="goToPage('sum')" style="margin-top: 10px; border-color: var(--primary-blue); color: var(--primary-blue);">6. Summary</div>
       </nav>
 
       <div class="content-area">
-        
-        <div id="page-1" class="page-section active">
+
+  <!-- เริ่มส่วนที่1 Combustion Air Quantity-->
+
+  <style>
+  /* 1. คุมสัดส่วนคอลัมน์ให้ตรงกันเป๊ะทั้งตารางฟ้าและเหลือง */
+  .grid-table {
+    display: grid;
+    grid-template-columns: 2.5fr 0.8fr 1.5fr 1fr; /* สัดส่วน: รายการ | สัญลักษณ์ | ค่า | หน่วย */
+    gap: 12px 10px; /* ระยะห่างระหว่างแถว 12px และคอลัมน์ 10px */
+    margin-bottom: 20px;
+  }
+
+  /* 2. สไตล์ของแต่ละช่อง (Cell) */
+  .grid-cell {
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    min-height: 30px;
+  }
+
+  /* สีพื้นหลังตามสถานะ */
+  .bg-header { background-color: #f1f3f5; font-weight: bold; color: #555; }
+  .bg-blue { background-color: #a9d1e5; color: #333; }
+  .bg-yellow { background-color: #ffe699; color: #333; }
+  .bg-grey-section { 
+    background-color: #e9ecef; 
+    grid-column: span 4; 
+    font-weight: bold; 
+    justify-content: center; 
+  }
+  
+  /* ช่อง Input และช่องแสดงผล */
+  .bg-white-box { 
+    background-color: #f8f9fa; 
+    border: 1px solid #dee2e6; 
+    padding: 0; 
+    overflow: hidden;
+  }
+
+  .inner-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-weight: bold;
+    outline: none;
+  }
+
+  .left-align { justify-content: flex-start; }
+
+  /* 3. แถบสถานะหลังกดคำนวณ */
+  #status-display {
+    text-align: center;
+    background-color: #f0faff;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border: 1px solid #d0e8ff;
+  }
+
+  /* 4. ตัวเลขบนรูปภาพ */
+  .img-overlay {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid #333;
+    padding: 2px 8px;
+    min-width: 70px;
+    text-align: center;
+    font-weight: bold;
+    color: #00468c;
+  }
+</style>
+
+<div id="page-1" class="page-section active">
+  <h3 class="section-title">Combustion Air Quantity</h3>
+
+  <div class="grid-table">
+    <div class="grid-cell bg-grey-section">Design Criteria</div>
+
+    <div class="grid-cell bg-header">Parameter</div>
+    <div class="grid-cell bg-header">Symbol</div>
+    <div class="grid-cell bg-header">Value</div>
+    <div class="grid-cell bg-header">Unit</div>
+    
+    <div class="grid-cell bg-blue left-align">Amount of Solid Waste</div>
+    <div class="grid-cell bg-blue">mํ<sub>fuel</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_waste" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">Ton/Day</div>
+    
+    <div class="grid-cell bg-blue left-align">Higher Heating Value (as received)</div>
+    <div class="grid-cell bg-blue">HHV</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_hhv" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">kJ/kg</div>
+
+    <div class="grid-cell bg-blue left-align">Moisture</div>
+    <div class="grid-cell bg-blue">M</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_moisture" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">%wt</div>
+
+    <div class="grid-cell bg-blue left-align">Excess Air Ratio</div>
+    <div class="grid-cell bg-blue">E</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_excess_air" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue"></div>
+
+    <div class="grid-cell bg-blue left-align">Primary Air</div>
+    <div class="grid-cell bg-blue">PA</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_pa_ratio" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">%</div>
+
+    <div class="grid-cell bg-blue left-align">Secondary Air</div>
+    <div class="grid-cell bg-blue">SA</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_sa_ratio" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">%</div>
+  </div>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <button class="btn-calc" onclick="calculatePage1()" style="width: 100%; max-width: 400px; padding: 15px;">Calculate</button>
+  </div>
+
+  <div id="output-section" style="display: none;">
+    
+    <div id="status-display">
+      <h4 style="color: #28a745; margin: 0;">Status: Calculation Completed (See figures in the image)</h4>
+      <p style="margin: 10px 0 0 0; font-weight: bold; color: #00468c; font-size: 14px;">Calculation results</p>
+    </div>
+
+    <div class="grid-table">
+      <div class="grid-cell bg-grey-section">Mass of air required for combustion</div>
+      
+      <div class="grid-cell bg-yellow left-align">Mass of air required for combustion</div>
+      <div class="grid-cell bg-yellow">m&#775;<sub>air</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="out_ma" class="inner-input" readonly value="0.00"></div>
+      <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
+
+      <div class="grid-cell bg-yellow left-align">Primary Air Mass</div>
+      <div class="grid-cell bg-yellow">m&#775;<sub>1</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="out_map" class="inner-input" readonly value="0.00"></div>
+      <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
+
+      <div class="grid-cell bg-yellow left-align">Secondary Air Mass</div>
+      <div class="grid-cell bg-yellow">m&#775;<sub>2</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="out_mas" class="inner-input" readonly value="0.00"></div>
+      <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
+
+      <div class="grid-cell bg-grey-section" style="margin-top: 10px;">Volumetric Flow Rate of Combustion Air</div>
+      
+      <div class="grid-cell bg-yellow left-align">Required Combustion Air Flow</div>
+      <div class="grid-cell bg-yellow">V&#775;<sub>dry air</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="out_qa" class="inner-input" readonly value="0.00"></div>
+      <div class="grid-cell bg-yellow">Nm³/hr</div>
+
+      <div class="grid-cell bg-yellow left-align">Primary Air Flow Rate</div>
+      <div class="grid-cell bg-yellow">V&#775;<sub>1</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="out_qap" class="inner-input" readonly value="0.00"></div>
+      <div class="grid-cell bg-yellow">Nm³/hr</div>
+
+      <div class="grid-cell bg-yellow left-align">Secondary Air Flow Rate</div>
+      <div class="grid-cell bg-yellow">V&#775;<sub>2</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="out_qas" class="inner-input" readonly value="0.00"></div>
+      <div class="grid-cell bg-yellow">Nm³/hr</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+      <div style="position: relative; display: inline-block; width: 100%; max-width: 550px;">
+        <img src="image/Airflow (2).png" style="width: 100%; height: auto; display: block;">
+        <div id="box-val-sec" class="img-overlay" style="top: 38%; left: 87%;">0.00</div>
+        <div id="box-val-pri" class="img-overlay" style="top: 71%; left: 89%;">0.00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function calculatePage1() {
+    // 1. แสดงส่วนผลลัพธ์
+    document.getElementById('output-section').style.display = 'block';
+
+    // 2. เลื่อนหน้าจอลงไปที่แถบสถานะอย่างนุ่มนวล
+    document.getElementById('status-display').scrollIntoView({ behavior: 'smooth' });
+
+    // 3. (รอใส่สูตรคำนวณ) ตัวอย่างการส่งค่าไปแสดงบนรูปภาพ
+    const demoVal = 123.45;
+    document.getElementById('box-val-sec').innerText = demoVal.toFixed(2);
+    document.getElementById('box-val-pri').innerText = (demoVal / 2).toFixed(2);
+  }
+</script>
+        <!-- จบส่วนที่ 1 Combustion Air Quantity -->
+
+        <!-- เริ่มส่วนที่ 2  Exhaust Gas Generation -->
+         <div id="page-2" class="page-section">
           <h3 class="section-title">ปริมาณอากาศที่ใช้ในการเผาไหม้</h3>
+          
           <div class="custom-table">
-            <div class="ct-row">
-              <div class="ct-header">รายการ</div>
-              <div class="ct-header">สัญลักษณ์</div>
-              <div class="ct-header">ค่าที่ได้</div>
-              <div class="ct-header">หน่วย</div>
-            </div>
             <div class="ct-section">เกณฑ์ในการออกแบบ</div>
             <div class="ct-row">
               <div class="ct-blue left-align">Amount of Solid Waste</div>
@@ -380,82 +672,34 @@
               <div class="ct-blue">Ton/day</div>
             </div>
             <div class="ct-row">
-              <div class="ct-blue left-align">HHV of waste</div>
+              <div class="ct-blue left-align">Secondary Air Ratio</div>
               <div class="ct-blue">X</div>
               <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-blue"></div>
+              <div class="ct-blue">%</div>
             </div>
-            <div class="ct-row">
-              <div class="ct-blue left-align">Moisture</div>
-              <div class="ct-blue">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-blue"></div>
-            </div>
-            <div class="ct-row">
-              <div class="ct-blue left-align">Excess Air Amount</div>
-              <div class="ct-blue">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-blue"></div>
-            </div>
-            <div class="ct-row">
-              <div class="ct-blue left-align">Primary Air</div>
-              <div class="ct-blue">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-blue"></div>
-            </div>
-            <div class="ct-row">
-              <div class="ct-blue left-align">Secondary Air</div>
-              <div class="ct-blue">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-blue"></div>
-            </div>
+          </div>
 
-            <div class="ct-section" style="margin-top: 10px;">มวลของอากาศที่ต้องใช้ในการเผาไหม้เชื้อเพลิง</div>
-            <div class="ct-row">
-              <div class="ct-yellow left-align">มวลของอากาศที่ต้องใช้ในการเผาไหม้เชื้อเพลิง</div><div class="ct-yellow">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-yellow"></div>
-            </div>
-            <div class="ct-row">
-              <div class="ct-yellow left-align">มวลของอากาศปฐมภูมิ</div><div class="ct-yellow">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-yellow"></div>
-            </div>
-            <div class="ct-row">
-              <div class="ct-yellow left-align">มวลของอากาศทุติยภูมิ</div><div class="ct-yellow">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-yellow"></div>
-            </div>
-            <div class="ct-section" style="margin-top: 10px;">Volumetric Flow Rate of Combustion Air</div>
-            <div class="ct-row">
-              <div class="ct-yellow left-align">equired Combustion Air Flow</div><div class="ct-yellow">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-yellow"></div>
-            </div>
-            <div class="ct-row">
-              <div class="ct-yellow left-align">Primary Air Flow Rate</div><div class="ct-yellow">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-yellow"></div>
-            </div>
-            <div class="ct-row">
-              <div class="ct-yellow left-align">Secondary Air Flow Rate</div><div class="ct-yellow">X</div>
-              <div class="ct-input-box"><input type="number" class="ct-input inp-1" placeholder="0"></div>
-              <div class="ct-yellow"></div>
-            </div>
-             
-          
           <button class="btn-calc" onclick="calculate(1)">คำนวณ (Calculate)</button>
-          <div class="result-box">ผลลัพธ์: <span id="res-1">0</span></div>
-        </div>
+          
+          <div class="result-box">สถานะ: <span id="status-text">กรุณากดคำนวณ</span></div>
 
-        <div id="page-2" class="page-section">
-          <h3 class="section-title">ส่วนที่ 2: ปริมาณก๊าซไอเสียที่เกิด</h3>
-          <div class="input-group"><label>ค่า B1:</label><input type="number" class="inp-2" placeholder="0"></div>
-          <div class="input-group"><label>ค่า B2:</label><input type="number" class="inp-2" placeholder="0"></div>
-          <button class="btn-calc" onclick="calculate(2)">คำนวณ (Calculate)</button>
-          <div class="result-box">ผลลัพธ์: <span id="res-2">0</span></div>
-        </div>
+          <div id="result-image-box" style="display: none; margin-top: 30px; text-align: center;">
+            
+            <h4 style="color: var(--primary-blue);">ผลลัพธ์การคำนวณ</h4>
 
+            <div class="diagram-container">
+              <img src="image/Airflow (2).png" class="diagram-img" alt="Diagram">
+              
+              <div id="box-val-sec" class="overlay-number pos-top">0</div>
+
+              <div id="box-val-pri" class="overlay-number pos-bottom">0</div>
+            </div>
+
+          </div>
+        </div> 
+        <!-- จบส่วนที่ 2 -->
+
+        <!-- เริ่มส่วนที่ 3 -->
         <div id="page-3" class="page-section">
           <h3 class="section-title">ส่วนที่ 3: อุณหภูมิของกระบวนการเผาไหม้</h3>
           <div class="input-group"><label>ค่า C1:</label><input type="number" class="inp-3" placeholder="0"></div>
@@ -463,6 +707,7 @@
           <button class="btn-calc" onclick="calculate(3)">คำนวณ (Calculate)</button>
           <div class="result-box">ผลลัพธ์: <span id="res-3">0</span></div>
         </div>
+        <!-- จบส่วนที่ 3 -->
 
         <div id="page-4" class="page-section">
           <h3 class="section-title">ส่วนที่ 4: อัตราการผลิตไอน้ำ</h3>
@@ -514,6 +759,8 @@
   </main>
 
   <footer>
+    <footer id="contact-section">
+
     <div class="footer-content">
       <div class="f-col-info">
         <div class="footer-logo-area">
@@ -550,94 +797,87 @@
     </div>
   </footer>
 
+  <!-- javascript -->
   <script>
-    // 1. ตัวแปรเก็บค่าผลลัพธ์แต่ละหน้า (Global Variable)
-    let pageResults = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
-
-    // 2. ฟังก์ชันสลับหน้า (Link กับปุ่มเมนูซ้ายมือ)
-    function goToPage(pageId) {
-      // ลบคลาส active จากปุ่มทั้งหมด
-      const navButtons = document.querySelectorAll('.sidebar .nav-btn');
-      navButtons.forEach(btn => btn.classList.remove('active'));
-      
-      // ซ่อนทุก Section
-      const sections = document.querySelectorAll('.page-section');
-      sections.forEach(sec => sec.classList.remove('active'));
-
-      // แสดง Section ที่เลือก
-      const targetSection = document.getElementById('page-' + pageId);
-      if (targetSection) {
-        targetSection.classList.add('active');
-      }
-
-      // ไฮไลท์ปุ่มเมนูที่เลือก
-      let indexToCheck = -1;
-      if(pageId === 'sum') {
-        indexToCheck = navButtons.length - 1; // ปุ่มสุดท้าย
-      } else {
-        indexToCheck = pageId - 1; // Index เริ่มที่ 0
-      }
-
-      if(navButtons[indexToCheck]) {
-        navButtons[indexToCheck].classList.add('active');
-      }
-
-      // ถ้าเป็นหน้า Sum ให้ render ข้อมูลใหม่
-      if(pageId === 'sum') renderSumPage();
-    }
-
-    // 3. ฟังก์ชันคำนวณ (Mockup: รวมค่า Input ในหน้านั้น)
-    function calculate(pageIndex) {
-      // ดึง Input ตาม Class ของหน้านั้นๆ (เช่น inp-1) มาบวกกัน
-      let inputs = document.querySelectorAll(`.inp-${pageIndex}`);
-      let sum = 0;
-      
-      inputs.forEach(input => {
-        let val = parseFloat(input.value);
-        if(!isNaN(val)) sum += val;
+    // --- ฟังก์ชัน 1: สำหรับเปลี่ยนหน้า (Tab) ---
+    function goToPage(pageIndex) {
+      // 1. ซ่อนทุกหน้าก่อน
+      document.querySelectorAll('.page-section').forEach(page => {
+        page.classList.remove('active');
       });
-      
-      // บันทึกค่าลงตัวแปรกลาง
-      pageResults[pageIndex] = sum;
-      
-      // แสดงผลในหน้านั้น
-      const resultSpan = document.getElementById(`res-${pageIndex}`);
-      if(resultSpan) resultSpan.innerText = sum.toLocaleString();
-    }
 
-    // 4. ฟังก์ชันแสดงหน้าสรุปผล
-    function renderSumPage() {
-      let container = document.getElementById('sum-list-container');
-      container.innerHTML = ''; // เคลียร์ของเก่า
-      let grandTotal = 0;
+      // 2. เอาไฮไลท์ออกจากปุ่มเมนูทั้งหมด
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
 
-      // วนลูปดึงค่าจากหน้าที่ 1-7
-      for(let i=1; i<=7; i++) {
-        let val = pageResults[i];
-        grandTotal += val;
-        
-        // สร้าง HTML list item
-        let html = `
-          <li class="sum-item">
-            <span class="sum-label">ผลลัพธ์ส่วนที่ ${i}</span>
-            <span class="sum-value" style="font-weight:bold;">+ ${val.toLocaleString()}</span>
-          </li>
-        `;
-        container.innerHTML += html;
+      // 3. แสดงหน้าเป้าหมาย
+      const targetPage = document.getElementById('page-' + pageIndex);
+      if (targetPage) {
+        targetPage.classList.add('active');
       }
+
+      // 4. ไฮไลท์ปุ่มที่กด (คำนวณลำดับปุ่ม)
+      const buttons = document.querySelectorAll('.nav-btn');
+      let btnIndex = -1;
       
-      // แสดงยอดรวม
-      document.getElementById('grand-total-display').innerText = grandTotal.toLocaleString();
+      if (pageIndex === 'sum') {
+        // ถ้าเป็นหน้า Summary คือปุ่มสุดท้าย
+        btnIndex = buttons.length - 1;
+      } else {
+        // ถ้าเป็นตัวเลข ให้ลบ 1 เพราะ index เริ่มที่ 0
+        btnIndex = parseInt(pageIndex) - 1;
+      }
+
+      if (buttons[btnIndex]) {
+        buttons[btnIndex].classList.add('active');
+      }
     }
 
-    // 5. ฟังก์ชันสำหรับเมนูมือถือ
+    // --- ฟังก์ชัน 2: เปิด/ปิด เมนูมือถือ (Hamburger) ---
     function toggleMenu() {
       const menu = document.getElementById('sideMenu');
       const overlay = document.getElementById('menuOverlay');
-      menu.classList.toggle('active');
-      overlay.classList.toggle('active');
+      
+      // เช็คว่ามี class 'active' อยู่ไหม
+      if (menu.classList.contains('active')) {
+        menu.classList.remove('active');
+        overlay.classList.remove('active');
+      } else {
+        menu.classList.add('active');
+        overlay.classList.add('active');
+      }
     }
+
+    // --- ฟังก์ชัน 3: คำนวณ (Calculate) ---
+function calculatePage1() {
+    // 1. ดึงค่าจาก Input
+    const waste = parseFloat(document.getElementById('in_waste').value) || 0;
+    const hhv = parseFloat(document.getElementById('in_hhv').value) || 0;
+    // ... ดึงค่าอื่นๆ ตามต้องการ
+
+    // 2. ส่วนของสูตรคำนวณ (เดี๋ยวคุณมาใส่ตรงนี้)
+    let ma_result = 0; 
+    let map_result = 0;
+    let mas_result = 0;
+    // ตัวอย่าง: ma_result = waste * hhv ...
+
+    // 3. แสดงผลลัพธ์ลงในช่องสีเหลือง
+    document.getElementById('out_ma').value = ma_result.toFixed(2);
+    document.getElementById('out_map').value = map_result.toFixed(2);
+    document.getElementById('out_mas').value = mas_result.toFixed(2);
+    
+    // 4. แสดงผลลัพธ์บนรูปภาพ
+    document.getElementById('box-val-sec').innerText = mas_result.toFixed(2);
+    document.getElementById('box-val-pri').innerText = map_result.toFixed(2);
+
+    // 5. สั่งให้ส่วนผลลัพธ์ (ตารางเหลือง + รูป) แสดงออกมา
+    document.getElementById('output-section').style.display = 'block';
+}
   </script>
 
 </body>
 </html>
+
+
+ 
