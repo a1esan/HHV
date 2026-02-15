@@ -651,8 +651,10 @@
 
 <script>
 function calculatePage1() {
-    // ฟังก์ชันช่วยดึงค่า ถ้าว่างให้เป็น 0
-    const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? parseFloat(el.value) || 0 : 0;
+    };
 
     // --- 1. ดึงค่าจาก Input ---
     const m_fuel_day = getVal('in_waste');
@@ -663,50 +665,40 @@ function calculatePage1() {
     const pa_ratio   = getVal('in_pa_ratio') / 100;
     const sa_ratio   = getVal('in_sa_ratio') / 100;
 
-    // --- 2. ตรวจสอบความครบถ้วนของข้อมูลที่จำเป็น ---
-    if (m_fuel_day <= 0 || excess_air <= 0 || (pa_ratio + sa_ratio) <= 0) {
-        alert("กรุณากรอกข้อมูลปริมาณขยะ, Excess Air และสัดส่วนอากาศให้ครบถ้วน");
+    // --- 2. ตรวจสอบเงื่อนไข (Validation) ---
+    if (m_fuel_day <= 0 || moisture <= 0 || excess_air <= 0 || (pa_ratio + sa_ratio) <= 0) {
+        alert("กรุณากรอกข้อมูลให้ครบถ้วน: ปริมาณขยะ, ความชื้น, Excess Air, และสัดส่วนอากาศ");
         return;
     }
 
     let final_lhv = 0;
 
-    // --- 3. Logic การเลือกค่า LHV (ตามเงื่อนไขที่คุณต้องการ) ---
+    // --- 3. จัดการ HHV / LHV ตามสมการ ---
     if (lhv_input > 0) {
-        // ถ้าผู้ใช้กรอก LHV มาแล้ว (ไม่เป็น 0) ให้ใช้ค่านี้ทันที
         final_lhv = lhv_input;
     } else if (hhv > 0) {
-        // ถ้า LHV เป็น 0 แต่มี HHV ให้คำนวณตามสูตรในรูปภาพ
-        // LHV = HHV - (24.42 * M)
+        // คำนวณ LHV = HHV - (24.42 * M)
         final_lhv = hhv - (24.42 * moisture);
+        // เติมค่ากลับไปในช่อง LHV เพื่อให้ผู้ใช้เห็นค่าที่ใช้คำนวณจริง
+        document.getElementById('in_lhv').value = final_lhv.toFixed(2);
     } else {
-        alert("กรุณากรอกค่า HHV หรือ LHV อย่างใดอย่างหนึ่ง (ค่าต้องมากกว่า 0)");
+        alert("กรุณากรอกค่า HHV หรือ LHV อย่างใดอย่างหนึ่ง");
         return;
     }
 
-    // --- 4. เริ่มการคำนวณตามสมการ ---
-    
-    // แปลงเชื้อเพลิงเป็น kg/hr
+    // --- 4. การคำนวณทางวิศวกรรม ---
     const m_fuel_hr = (m_fuel_day * 1000) / 24;
-
-    // คำนวณหาอากาศทฤษฎี (Ao) - ใช้ค่าคงที่ประมาณการ 3110 kJ/kg_air
     const ao = final_lhv / 3110; 
-
-    // Mass of air required (ṁ_air) = m_fuel * Ao * Excess Air
     const m_dot_air = m_fuel_hr * ao * excess_air;
 
-    // แบ่งเป็น Primary (ṁ1) และ Secondary (ṁ2)
     const m_dot_1 = m_dot_air * pa_ratio;
     const m_dot_2 = m_dot_air * sa_ratio;
 
-    // คำนวณ Volumetric Flow Rate (V̇) ณ สภาวะมาตรฐาน (ρ ≈ 1.293 kg/Nm³)
     const v_dot_air = m_dot_air / 1.293;
     const v_dot_1 = v_dot_air * pa_ratio;
     const v_dot_2 = v_dot_air * sa_ratio;
 
-    // --- 5. แสดงผลลัพธ์ ---
-    
-    // แสดงในตาราง Output
+    // --- 5. แสดงผลลัพธ์ในช่อง Output ---
     document.getElementById('out_ma').value  = m_dot_air.toFixed(2);
     document.getElementById('out_map').value = m_dot_1.toFixed(2);
     document.getElementById('out_mas').value = m_dot_2.toFixed(2);
@@ -715,13 +707,18 @@ function calculatePage1() {
     document.getElementById('out_qap').value = v_dot_1.toFixed(2);
     document.getElementById('out_qas').value = v_dot_2.toFixed(2);
 
-    // แสดงตัวเลขบนรูปภาพ
+    // อัปเดตบนรูปภาพ
     document.getElementById('box-val-pri').innerText = m_dot_1.toFixed(2);
     document.getElementById('box-val-sec').innerText = m_dot_2.toFixed(2);
 
-    // เปิดการแสดงผลผลลัพธ์
-    document.getElementById('output-section').style.display = 'block';
-    document.getElementById('status-display').scrollIntoView({ behavior: 'smooth' });
+    // --- 6. คำสั่งเปิดส่วนแสดงผล (หัวใจสำคัญที่คุณต้องการ) ---
+    const outputSection = document.getElementById('output-section');
+    outputSection.style.display = 'block'; // เปลี่ยนจากซ่อนเป็นแสดงผลทันทีที่กดปุ่ม
+    
+    // ใช้ setTimeout เล็กน้อยเพื่อให้เบราว์เซอร์ Render ทันก่อนเลื่อนหน้าจอ
+    setTimeout(() => {
+        document.getElementById('status-display').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
 }
 </script>
         <!-- จบส่วนที่ 1 Combustion Air Quantity -->
