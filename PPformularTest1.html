@@ -492,6 +492,7 @@
   /* สีพื้นหลังตามสถานะ */
   .bg-header { background-color: #f1f3f5; font-weight: bold; color: #555; }
   .bg-blue { background-color: #a9d1e5; color: #333; }
+  .bg-pink { background-color: #ffccbc; color: #333; }
   .bg-yellow { background-color: #ffe699; color: #333; }
   .bg-grey-section { 
     background-color: #e9ecef; 
@@ -556,7 +557,7 @@
     <div class="grid-cell bg-header">Unit</div>
     
     <div class="grid-cell bg-blue left-align">Amount of Solid Waste</div>
-    <div class="grid-cell bg-blue">mํ<sub>fuel</sub></div>
+    <div class="grid-cell bg-blue">m&#775;<sub>fuel</sub></div>
     <div class="grid-cell bg-white-box"><input type="number" id="in_waste" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">Ton/Day</div>
     
@@ -564,6 +565,11 @@
     <div class="grid-cell bg-blue">HHV</div>
     <div class="grid-cell bg-white-box"><input type="number" id="in_hhv" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
+
+    <div class="grid-cell bg-pink left-align">Lower Heating Value (as received)</div>
+    <div class="grid-cell bg-pink">LHV</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_lhv" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-pink">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Moisture</div>
     <div class="grid-cell bg-blue">M</div>
@@ -644,18 +650,79 @@
 </div>
 
 <script>
-  function calculatePage1() {
-    // 1. แสดงส่วนผลลัพธ์
+function calculatePage1() {
+    // ฟังก์ชันช่วยดึงค่า ถ้าว่างให้เป็น 0
+    const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
+
+    // --- 1. ดึงค่าจาก Input ---
+    const m_fuel_day = getVal('in_waste');
+    const hhv        = getVal('in_hhv');
+    const lhv_input  = getVal('in_lhv');
+    const moisture   = getVal('in_moisture');
+    const excess_air = getVal('in_excess_air');
+    const pa_ratio   = getVal('in_pa_ratio') / 100;
+    const sa_ratio   = getVal('in_sa_ratio') / 100;
+
+    // --- 2. ตรวจสอบความครบถ้วนของข้อมูลที่จำเป็น ---
+    if (m_fuel_day <= 0 || excess_air <= 0 || (pa_ratio + sa_ratio) <= 0) {
+        alert("กรุณากรอกข้อมูลปริมาณขยะ, Excess Air และสัดส่วนอากาศให้ครบถ้วน");
+        return;
+    }
+
+    let final_lhv = 0;
+
+    // --- 3. Logic การเลือกค่า LHV (ตามเงื่อนไขที่คุณต้องการ) ---
+    if (lhv_input > 0) {
+        // ถ้าผู้ใช้กรอก LHV มาแล้ว (ไม่เป็น 0) ให้ใช้ค่านี้ทันที
+        final_lhv = lhv_input;
+    } else if (hhv > 0) {
+        // ถ้า LHV เป็น 0 แต่มี HHV ให้คำนวณตามสูตรในรูปภาพ
+        // LHV = HHV - (24.42 * M)
+        final_lhv = hhv - (24.42 * moisture);
+    } else {
+        alert("กรุณากรอกค่า HHV หรือ LHV อย่างใดอย่างหนึ่ง (ค่าต้องมากกว่า 0)");
+        return;
+    }
+
+    // --- 4. เริ่มการคำนวณตามสมการ ---
+    
+    // แปลงเชื้อเพลิงเป็น kg/hr
+    const m_fuel_hr = (m_fuel_day * 1000) / 24;
+
+    // คำนวณหาอากาศทฤษฎี (Ao) - ใช้ค่าคงที่ประมาณการ 3110 kJ/kg_air
+    const ao = final_lhv / 3110; 
+
+    // Mass of air required (ṁ_air) = m_fuel * Ao * Excess Air
+    const m_dot_air = m_fuel_hr * ao * excess_air;
+
+    // แบ่งเป็น Primary (ṁ1) และ Secondary (ṁ2)
+    const m_dot_1 = m_dot_air * pa_ratio;
+    const m_dot_2 = m_dot_air * sa_ratio;
+
+    // คำนวณ Volumetric Flow Rate (V̇) ณ สภาวะมาตรฐาน (ρ ≈ 1.293 kg/Nm³)
+    const v_dot_air = m_dot_air / 1.293;
+    const v_dot_1 = v_dot_air * pa_ratio;
+    const v_dot_2 = v_dot_air * sa_ratio;
+
+    // --- 5. แสดงผลลัพธ์ ---
+    
+    // แสดงในตาราง Output
+    document.getElementById('out_ma').value  = m_dot_air.toFixed(2);
+    document.getElementById('out_map').value = m_dot_1.toFixed(2);
+    document.getElementById('out_mas').value = m_dot_2.toFixed(2);
+
+    document.getElementById('out_qa').value  = v_dot_air.toFixed(2);
+    document.getElementById('out_qap').value = v_dot_1.toFixed(2);
+    document.getElementById('out_qas').value = v_dot_2.toFixed(2);
+
+    // แสดงตัวเลขบนรูปภาพ
+    document.getElementById('box-val-pri').innerText = m_dot_1.toFixed(2);
+    document.getElementById('box-val-sec').innerText = m_dot_2.toFixed(2);
+
+    // เปิดการแสดงผลผลลัพธ์
     document.getElementById('output-section').style.display = 'block';
-
-    // 2. เลื่อนหน้าจอลงไปที่แถบสถานะอย่างนุ่มนวล
     document.getElementById('status-display').scrollIntoView({ behavior: 'smooth' });
-
-    // 3. (รอใส่สูตรคำนวณ) ตัวอย่างการส่งค่าไปแสดงบนรูปภาพ
-    const demoVal = 123.45;
-    document.getElementById('box-val-sec').innerText = demoVal.toFixed(2);
-    document.getElementById('box-val-pri').innerText = (demoVal / 2).toFixed(2);
-  }
+}
 </script>
         <!-- จบส่วนที่ 1 Combustion Air Quantity -->
 
@@ -698,61 +765,6 @@
           </div>
         </div> 
         <!-- จบส่วนที่ 2 -->
-
-        <!-- เริ่มส่วนที่ 3 -->
-        <div id="page-3" class="page-section">
-          <h3 class="section-title">ส่วนที่ 3: อุณหภูมิของกระบวนการเผาไหม้</h3>
-          <div class="input-group"><label>ค่า C1:</label><input type="number" class="inp-3" placeholder="0"></div>
-          <div class="input-group"><label>ค่า C2:</label><input type="number" class="inp-3" placeholder="0"></div>
-          <button class="btn-calc" onclick="calculate(3)">คำนวณ (Calculate)</button>
-          <div class="result-box">ผลลัพธ์: <span id="res-3">0</span></div>
-        </div>
-        <!-- จบส่วนที่ 3 -->
-
-        <div id="page-4" class="page-section">
-          <h3 class="section-title">ส่วนที่ 4: อัตราการผลิตไอน้ำ</h3>
-          <div class="input-group"><label>ค่า D1:</label><input type="number" class="inp-4" placeholder="0"></div>
-          <div class="input-group"><label>ค่า D2:</label><input type="number" class="inp-4" placeholder="0"></div>
-          <button class="btn-calc" onclick="calculate(4)">คำนวณ (Calculate)</button>
-          <div class="result-box">ผลลัพธ์: <span id="res-4">0</span></div>
-        </div>
-
-        <div id="page-5" class="page-section">
-          <h3 class="section-title">ส่วนที่ 5: งานและพลังงานไฟฟ้าที่ผลิตได้</h3>
-          <div class="input-group"><label>ค่า E1:</label><input type="number" class="inp-5" placeholder="0"></div>
-          <div class="input-group"><label>ค่า E2:</label><input type="number" class="inp-5" placeholder="0"></div>
-          <button class="btn-calc" onclick="calculate(5)">คำนวณ (Calculate)</button>
-          <div class="result-box">ผลลัพธ์: <span id="res-5">0</span></div>
-        </div>
-
-        <div id="page-6" class="page-section">
-          <h3 class="section-title">ส่วนที่ 6: Boiler Efficiency</h3>
-          <div class="input-group"><label>ค่า F1:</label><input type="number" class="inp-6" placeholder="0"></div>
-          <div class="input-group"><label>ค่า F2:</label><input type="number" class="inp-6" placeholder="0"></div>
-          <button class="btn-calc" onclick="calculate(6)">คำนวณ (Calculate)</button>
-          <div class="result-box">ผลลัพธ์: <span id="res-6">0</span></div>
-        </div>
-
-        <div id="page-7" class="page-section">
-          <h3 class="section-title">ส่วนที่ 7: Turbine & Generator</h3>
-          <div class="input-group"><label>ค่า G1:</label><input type="number" class="inp-7" placeholder="0"></div>
-          <div class="input-group"><label>ค่า G2:</label><input type="number" class="inp-7" placeholder="0"></div>
-          <button class="btn-calc" onclick="calculate(7)">คำนวณ (Calculate)</button>
-          <div class="result-box">ผลลัพธ์: <span id="res-7">0</span></div>
-        </div>
-
-        <div id="page-sum" class="page-section">
-          <h3 class="section-title">สรุปผลรวม (Summary)</h3>
-          <p style="text-align:center; color:#666; margin-bottom: 20px;">นำผลลัพธ์ที่คำนวณได้จากทุกส่วนมารวมกัน</p>
-          <div style="background: var(--gray-bg); border: 1px solid #eee; padding: 20px; border-radius: 8px;">
-            <ul class="sum-list" id="sum-list-container">
-              </ul>
-          </div>
-          <div class="total-box">
-            <span>ยอดรวมสุทธิ (Grand Total):</span>
-            <span id="grand-total-display">0</span>
-          </div>
-        </div>
 
       </div>
     </div>
