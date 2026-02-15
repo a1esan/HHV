@@ -470,10 +470,13 @@
   <!-- เริ่มส่วนที่1 Combustion Air Quantity-->
 
   <style>
+    #output-section {
+    display: none; /* บังคับให้ซ่อนไว้ก่อนเสมอ */
+}
   /* 1. คุมสัดส่วนคอลัมน์ให้ตรงกันเป๊ะทั้งตารางฟ้าและเหลือง */
   .grid-table {
     display: grid;
-    grid-template-columns: 2.5fr 0.8fr 1.5fr 1fr; /* สัดส่วน: รายการ | สัญลักษณ์ | ค่า | หน่วย */
+    grid-template-columns: 2.0fr 0.8fr 2.0fr 1fr; /* สัดส่วน: รายการ | สัญลักษณ์ | ค่า | หน่วย */
     gap: 12px 10px; /* ระยะห่างระหว่างแถว 12px และคอลัมน์ 10px */
     margin-bottom: 20px;
   }
@@ -545,30 +548,37 @@
   }
 </style>
 
+<style>
+  #output-section { 
+    display: none !important; 
+  }
+  .img-overlay {
+    position: absolute; transform: translate(-50%, -50%);
+    background-color: white; border: 1px solid #333; padding: 2px 8px;
+    min-width: 80px; text-align: center; font-weight: bold; color: #00468c;
+    border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+</style>
+
 <div id="page-1" class="page-section active">
   <h3 class="section-title">Combustion Air Quantity</h3>
 
   <div class="grid-table">
-    <div class="grid-cell bg-grey-section">Design Criteria</div>
-
-    <div class="grid-cell bg-header">Parameter</div>
-    <div class="grid-cell bg-header">Symbol</div>
-    <div class="grid-cell bg-header">Value</div>
-    <div class="grid-cell bg-header">Unit</div>
+    <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Design Criteria</div>
     
     <div class="grid-cell bg-blue left-align">Amount of Solid Waste</div>
-    <div class="grid-cell bg-blue">m&#775;<sub>fuel</sub></div>
+    <div class="grid-cell bg-blue">ṁ<sub>fuel</sub></div>
     <div class="grid-cell bg-white-box"><input type="number" id="in_waste" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">Ton/Day</div>
     
-    <div class="grid-cell bg-blue left-align">Higher Heating Value (as received)</div>
+    <div class="grid-cell bg-blue left-align">Higher Heating Value</div>
     <div class="grid-cell bg-blue">HHV</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_hhv" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_hhv" class="inner-input" placeholder="Enter HHV (or 0 if use LHV)"></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
 
-    <div class="grid-cell bg-pink left-align">Lower Heating Value (as received)</div>
+    <div class="grid-cell bg-pink left-align">Lower Heating Value</div>
     <div class="grid-cell bg-pink">LHV</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_lhv" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_lhv" class="inner-input" placeholder="Enter LHV (or 0 if use HHV)"></div>
     <div class="grid-cell bg-pink">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Moisture</div>
@@ -593,56 +603,37 @@
   </div>
 
   <div style="text-align: center; margin: 30px 0;">
-    <button class="btn-calc" onclick="calculatePage1()" style="width: 100%; max-width: 400px; padding: 15px;">Calculate</button>
+    <button type="button" class="btn-calc" onclick="runCombustionCalc()" style="width: 100%; max-width: 400px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate</button>
   </div>
 
-  <div id="output-section" style="display: none;">
-    
-    <div id="status-display">
+  <div id="output-section">
+    <div id="status-display" style="text-align: center; background: #f0faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d0e8ff;">
       <h4 style="color: #28a745; margin: 0;">Status: Calculation Completed (See figures in the image)</h4>
-      <p style="margin: 10px 0 0 0; font-weight: bold; color: #00468c; font-size: 14px;">Calculation results</p>
     </div>
 
     <div class="grid-table">
-      <div class="grid-cell bg-grey-section">Mass of air required for combustion</div>
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Mass of air required for combustion</div>
       
-      <div class="grid-cell bg-yellow left-align">Mass of air required for combustion</div>
-      <div class="grid-cell bg-yellow">m&#775;<sub>air</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="out_ma" class="inner-input" readonly value="0.00"></div>
+      <div class="grid-cell bg-yellow left-align">Total Air required</div>
+      <div class="grid-cell bg-yellow">ṁ<sub>air</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_ma" class="inner-input" readonly></div>
       <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
 
       <div class="grid-cell bg-yellow left-align">Primary Air Mass</div>
-      <div class="grid-cell bg-yellow">m&#775;<sub>1</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="out_map" class="inner-input" readonly value="0.00"></div>
+      <div class="grid-cell bg-yellow">ṁ<sub>1</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_map" class="inner-input" readonly></div>
       <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
 
       <div class="grid-cell bg-yellow left-align">Secondary Air Mass</div>
-      <div class="grid-cell bg-yellow">m&#775;<sub>2</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="out_mas" class="inner-input" readonly value="0.00"></div>
+      <div class="grid-cell bg-yellow">ṁ<sub>2</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_mas" class="inner-input" readonly></div>
       <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
-
-      <div class="grid-cell bg-grey-section" style="margin-top: 10px;">Volumetric Flow Rate of Combustion Air</div>
-      
-      <div class="grid-cell bg-yellow left-align">Required Combustion Air Flow</div>
-      <div class="grid-cell bg-yellow">V&#775;<sub>dry air</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="out_qa" class="inner-input" readonly value="0.00"></div>
-      <div class="grid-cell bg-yellow">Nm³/hr</div>
-
-      <div class="grid-cell bg-yellow left-align">Primary Air Flow Rate</div>
-      <div class="grid-cell bg-yellow">V&#775;<sub>1</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="out_qap" class="inner-input" readonly value="0.00"></div>
-      <div class="grid-cell bg-yellow">Nm³/hr</div>
-
-      <div class="grid-cell bg-yellow left-align">Secondary Air Flow Rate</div>
-      <div class="grid-cell bg-yellow">V&#775;<sub>2</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="out_qas" class="inner-input" readonly value="0.00"></div>
-      <div class="grid-cell bg-yellow">Nm³/hr</div>
     </div>
 
     <div style="text-align: center; margin-top: 30px;">
-      <div style="position: relative; display: inline-block; width: 100%; max-width: 550px;">
-        <img src="image/Airflow (2).png" style="width: 100%; height: auto; display: block;">
-        <div id="box-val-sec" class="img-overlay" style="top: 38%; left: 87%;">0.00</div>
+      <div style="position: relative; display: inline-block;">
+        <img src="image/Airflow (2).png" style="width: 100%; max-width: 550px; height: auto; display: block;">
+        <div id="box-val-sec" class="img-overlay" style="top: 35%; left: 86%;">0.00</div>
         <div id="box-val-pri" class="img-overlay" style="top: 71%; left: 89%;">0.00</div>
       </div>
     </div>
@@ -650,74 +641,73 @@
 </div>
 
 <script>
-function calculatePage1() {
-    const getVal = (id) => {
-        const el = document.getElementById(id);
-        return el ? parseFloat(el.value) || 0 : 0;
+function runCombustionCalc() {
+    const outSection = document.getElementById('output-section');
+    
+    // ฟังก์ชันดึงค่าจาก Input
+    const getNum = (id) => {
+        const v = document.getElementById(id).value;
+        return v === "" ? 0 : parseFloat(v);
     };
 
-    // --- 1. ดึงค่าจาก Input ---
-    const m_fuel_day = getVal('in_waste');
-    const hhv        = getVal('in_hhv');
-    const lhv_input  = getVal('in_lhv');
-    const moisture   = getVal('in_moisture');
-    const excess_air = getVal('in_excess_air');
-    const pa_ratio   = getVal('in_pa_ratio') / 100;
-    const sa_ratio   = getVal('in_sa_ratio') / 100;
+    // 1. ดึงค่าจาก Input
+    const waste = getNum('in_waste');
+    const hhv   = getNum('in_hhv');
+    const lhvIn = getNum('in_lhv');
+    const m     = getNum('in_moisture');
+    const e     = getNum('in_excess_air');
+    const pa    = getNum('in_pa_ratio');
+    const sa    = getNum('in_sa_ratio');
 
-    // --- 2. ตรวจสอบเงื่อนไข (Validation) ---
-    if (m_fuel_day <= 0 || moisture <= 0 || excess_air <= 0 || (pa_ratio + sa_ratio) <= 0) {
-        alert("กรุณากรอกข้อมูลให้ครบถ้วน: ปริมาณขยะ, ความชื้น, Excess Air, และสัดส่วนอากาศ");
+    // 2. ตรวจสอบข้อมูลเบื้องต้น (ถ้าไม่มีมวลเชื้อเพลิงหรือความชื้นจะไม่คำนวณ)
+    if (waste <= 0 || m <= 0 || e <= 0 || pa <= 0 || sa <= 0) {
+        alert("Please complete all required fields.");
         return;
     }
 
-    let final_lhv = 0;
+    // 3. Logic การจัดการค่าความร้อน (Back-end calculation)
+    let lhv_for_calc = 0;
 
-    // --- 3. จัดการ HHV / LHV ตามสมการ ---
-    if (lhv_input > 0) {
-        final_lhv = lhv_input;
+    if (lhvIn > 0) {
+        // ถ้าผู้ใช้ใส่ LHV มา ให้ใช้ค่านั้นเลย
+        lhv_for_calc = lhvIn;
     } else if (hhv > 0) {
-        // คำนวณ LHV = HHV - (24.42 * M)
-        final_lhv = hhv - (24.42 * moisture);
-        // เติมค่ากลับไปในช่อง LHV เพื่อให้ผู้ใช้เห็นค่าที่ใช้คำนวณจริง
-        document.getElementById('in_lhv').value = final_lhv.toFixed(2);
+        // ถ้าใส่ HHV มา ให้แปลงเป็น LHV หลังบ้านเพื่อใช้คำนวณต่อ (ไม่โชว์หน้าบ้าน)
+        // สูตร: LHV = HHV - (24.42 * M)
+        lhv_for_calc = hhv - (24.42 * m);
     } else {
-        alert("กรุณากรอกค่า HHV หรือ LHV อย่างใดอย่างหนึ่ง");
+        alert("Please enter either HHV or LHV (Enter 0 in the field you are not using).");
         return;
     }
 
-    // --- 4. การคำนวณทางวิศวกรรม ---
-    const m_fuel_hr = (m_fuel_day * 1000) / 24;
-    const ao = final_lhv / 3110; 
-    const m_dot_air = m_fuel_hr * ao * excess_air;
-
-    const m_dot_1 = m_dot_air * pa_ratio;
-    const m_dot_2 = m_dot_air * sa_ratio;
-
-    const v_dot_air = m_dot_air / 1.293;
-    const v_dot_1 = v_dot_air * pa_ratio;
-    const v_dot_2 = v_dot_air * sa_ratio;
-
-    // --- 5. แสดงผลลัพธ์ในช่อง Output ---
-    document.getElementById('out_ma').value  = m_dot_air.toFixed(2);
-    document.getElementById('out_map').value = m_dot_1.toFixed(2);
-    document.getElementById('out_mas').value = m_dot_2.toFixed(2);
-
-    document.getElementById('out_qa').value  = v_dot_air.toFixed(2);
-    document.getElementById('out_qap').value = v_dot_1.toFixed(2);
-    document.getElementById('out_qas').value = v_dot_2.toFixed(2);
-
-    // อัปเดตบนรูปภาพ
-    document.getElementById('box-val-pri').innerText = m_dot_1.toFixed(2);
-    document.getElementById('box-val-sec').innerText = m_dot_2.toFixed(2);
-
-    // --- 6. คำสั่งเปิดส่วนแสดงผล (หัวใจสำคัญที่คุณต้องการ) ---
-    const outputSection = document.getElementById('output-section');
-    outputSection.style.display = 'block'; // เปลี่ยนจากซ่อนเป็นแสดงผลทันทีที่กดปุ่ม
+    // 4. คำนวณมวลอากาศ (ṁ_air) ตามสูตรในรูปภาพ
+    // แปลงเชื้อเพลิงเป็น kg/hr: (W * 1000) / 24
+    const m_fuel_hr = (waste * 1000) / 24;
     
-    // ใช้ setTimeout เล็กน้อยเพื่อให้เบราว์เซอร์ Render ทันก่อนเลื่อนหน้าจอ
+    // คำนวณ ṁ_air (ใช้ค่า lhv_for_calc ที่เตรียมไว้)
+    // สูตรจากรูป: 0.33 * ((LHV*100)/(100-M)) * (1/1000) * (1+E) * (W*1000/24)
+    // หมายเหตุ: สัมประสิทธิ์ 0.33 และการหาร 1000 เป็นการแปลงหน่วยตามตำราที่คุณส่งมา
+    const m_dot_air = 0.33 * ((lhv_for_calc * 100) / (100 - m)) * (1 / 1000) * (1 + e) * m_fuel_hr;
+    
+    // แบ่งมวลอากาศตามสัดส่วน % ที่กรอก
+    const m1 = m_dot_air * (pa / 100);
+    const m2 = m_dot_air * (sa / 100);
+
+    // 5. เติมตัวเลขในตารางผลลัพธ์ (ช่อง readonly)
+    document.getElementById('res_ma').value = m_dot_air.toFixed(2);
+    document.getElementById('res_map').value = m1.toFixed(2);
+    document.getElementById('res_mas').value = m2.toFixed(2);
+
+    // อัปเดตตัวเลขบนรูปภาพ
+    document.getElementById('box-val-pri').innerText = m1.toFixed(2);
+    document.getElementById('box-val-sec').innerText = m2.toFixed(2);
+
+    // 6. แสดงผลหน้าจอผลลัพธ์
+    outSection.style.setProperty('display', 'block', 'important');
+    
+    // เลื่อนหน้าจอลงไปดูผล
     setTimeout(() => {
-        document.getElementById('status-display').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('status-display').scrollIntoView({ behavior: 'smooth' });
     }, 100);
 }
 </script>
