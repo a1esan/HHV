@@ -535,29 +535,29 @@
   }
 
   /* 4. ตัวเลขบนรูปภาพ */
-  .img-overlay {
-    position: absolute;
-    transform: translate(-50%, -50%);
+  .img-overlay-val {
     background-color: white;
-    border: 1px solid #333;
+    border: 2px solid #003366;
     padding: 2px 8px;
-    min-width: 70px;
+    min-width: 60px;
     text-align: center;
     font-weight: bold;
-    color: #00468c;
-  }
-</style>
+    color: #003366;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
-<style>
-  #output-section { 
-    display: none !important; 
-  }
-  .img-overlay {
-    position: absolute; transform: translate(-50%, -50%);
-    background-color: white; border: 1px solid #333; padding: 2px 8px;
-    min-width: 80px; text-align: center; font-weight: bold; color: #00468c;
-    border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
+.img-overlay-unit {
+    background-color: #f1f3f5;
+    border: 1px solid #ccc;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+}
 </style>
 
 <div id="page-1" class="page-section active">
@@ -573,12 +573,16 @@
     
     <div class="grid-cell bg-blue left-align">Higher Heating Value</div>
     <div class="grid-cell bg-blue">HHV</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_hhv" class="inner-input" placeholder="Enter HHV (or 0 if use LHV)"></div>
+    <div class="grid-cell bg-white-box">
+      <input type="number" id="in_hhv" class="inner-input" oninput="validateLive()" placeholder="Enter HHV (or 0 if use LHV)">
+    </div>
     <div class="grid-cell bg-blue">kJ/kg</div>
 
     <div class="grid-cell bg-pink left-align">Lower Heating Value</div>
     <div class="grid-cell bg-pink">LHV</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_lhv" class="inner-input" placeholder="Enter LHV (or 0 if use HHV)"></div>
+    <div class="grid-cell bg-white-box">
+      <input type="number" id="in_lhv" class="inner-input" oninput="validateLive()" placeholder="Enter LHV (or 0 if use HHV)">
+    </div>
     <div class="grid-cell bg-pink">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Moisture</div>
@@ -605,7 +609,7 @@
   </div>
 
   <div style="text-align: center; margin: 30px 0;">
-    <button type="button" class="btn-calc" onclick="runCombustionCalc()" style="width: 100%; max-width: 400px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate</button>
+    <button type="button" class="btn-calc" onclick="runCombustionCalc()" style="width: 100%; max-width: 400px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate Combustion Air Quantity</button>
   </div>
 
   <div id="output-section" style="display: none !important;">
@@ -647,11 +651,17 @@
       <div class="grid-cell bg-yellow">Nm³/hr</div>
     </div>
 
-    <div style="text-align: center; margin-top: 30px;">
-      <div style="position: relative; display: inline-block;">
-        <img src="image/Airflow (2).png" style="width: 100%; max-width: 550px; height: auto; display: block;">
-        <div id="box-val-sec" class="img-overlay" style="top: 35%; left: 86%;">0.00 Nm³/hr</div>
-        <div id="box-val-pri" class="img-overlay" style="top: 71%; left: 89%;">0.00 Nm³/hr</div>
+    <div style="position: relative; display: inline-block;">
+      <img src="image/Airflow (2).png" style="width: 100%; max-width: 550px; height: auto; display: block;">
+      
+      <div style="position: absolute; top: 32.5%; left: 75%; display: flex; gap: 4px;">
+          <div id="box-val-sec" class="img-overlay-val">0.00</div>
+          <div class="img-overlay-unit">Nm³/hr</div>
+      </div>
+
+      <div style="position: absolute; top: 68%; left: 78.5%; display: flex; gap: 4px;">
+          <div id="box-val-pri" class="img-overlay-val">0.00</div>
+          <div class="img-overlay-unit">Nm³/hr</div>
       </div>
     </div>
   </div>
@@ -664,36 +674,31 @@ function validateLive() {
     const eInput = document.getElementById('in_excess_air');
     const paInput = document.getElementById('in_pa_ratio');
     const saInput = document.getElementById('in_sa_ratio');
+    const hhvInput = document.getElementById('in_hhv');
+    const lhvInput = document.getElementById('in_lhv');
 
     const mVal = parseFloat(mInput.value) || 0;
     const eVal = parseFloat(eInput.value) || 0;
     const paVal = parseFloat(paInput.value) || 0;
     const saVal = parseFloat(saInput.value) || 0;
+    const hhvVal = parseFloat(hhvInput.value) || 0;
+    const lhvVal = parseFloat(lhvInput.value) || 0;
 
-    // 1. เช็ค Moisture (ต้องไม่เกิน 100 และมากกว่า 0)
-    if (mVal > 100 || mVal <= 0) {
-        mInput.style.color = "red";
-    } else {
-        mInput.style.color = "green";
-    }
+    // 1. เช็ค Moisture (0-100)
+    mInput.style.color = (mVal > 100 || mVal <= 0) ? "red" : "green";
 
-    // 2. เช็ค Excess Air (ต้องไม่เกิน 1.0)
-    if (eVal > 1) {
-        eInput.style.color = "red";
-    } else if (eVal > 0) {
-        eInput.style.color = "green";
-    } else {
-        eInput.style.color = "";
-    }
+    // 2. เช็ค Excess Air (ไม่เกิน 1.0)
+    eInput.style.color = (eVal > 1) ? "red" : (eVal > 0 ? "green" : "");
 
-    // 3. เช็ค PA + SA (ต้องรวมกันได้ 100 พอดี)
-    if (paVal + saVal === 100) {
-        paInput.style.color = "green";
-        saInput.style.color = "green";
-    } else {
-        paInput.style.color = "red";
-        saInput.style.color = "red";
-    }
+    // 3. เช็ค PA + SA (ต้องรวมได้ 100)
+    const isSumOk = (paVal + saVal === 100);
+    paInput.style.color = isSumOk ? "green" : "red";
+    saInput.style.color = isSumOk ? "green" : "red";
+
+    // --- ส่วนที่เพิ่มใหม่: แยกสี HHV และ LHV ---
+    // ถ้าค่าเป็น 0 ให้เป็นสีเทา (#999) ถ้ามีค่าให้เป็นสีน้ำเงินเข้ม (#003366)
+    hhvInput.style.color = (hhvVal === 0) ? "#999" : "#333";
+    lhvInput.style.color = (lhvVal === 0) ? "#999" : "#333";
 }
 
 /*** ฟังก์ชันหลักในการคำนวณ (Page 1)*/
@@ -769,8 +774,8 @@ function runCombustionCalc() {
     document.getElementById('res_vas').value = v2.toFixed(2);
 
     // 7. อัปเดตตัวเลขบนรูปภาพเป็นค่า "ปริมาตร" (V̇) พร้อมหน่วย
-    document.getElementById('box-val-pri').innerText = v1.toFixed(2) + " Nm³/hr";
-    document.getElementById('box-val-sec').innerText = v2.toFixed(2) + " Nm³/hr";
+    document.getElementById('box-val-pri').innerText = v1.toFixed(2);
+    document.getElementById('box-val-sec').innerText = v2.toFixed(2);
 
     // แสดงส่วนผลลัพธ์และเลื่อนหน้าจอ
     outSection.style.setProperty('display', 'block', 'important');
@@ -782,8 +787,8 @@ function runCombustionCalc() {
         <!-- จบส่วนที่ 1 Combustion Air Quantity -->
 
         <!-- เริ่มส่วนที่ 2  Exhaust Gas Generation -->
-        <div id="page-2" class="page-section">
-        <h3 class="section-title">Exhaust Gas Generation</h3>
+  <div id="page-2" class="page-section">
+  <h3 class="section-title">Exhaust Gas Generation</h3>
 
   <div class="grid-table">
     <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Design Criteria</div>
@@ -795,133 +800,98 @@ function runCombustionCalc() {
     
     <div class="grid-cell bg-blue left-align">Higher Heating Value</div>
     <div class="grid-cell bg-blue">HHV</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_hhv2" class="inner-input" placeholder="Enter HHV (or 0 if use LHV)"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_hhv2" class="inner-input" oninput="validateLive2()" placeholder="Enter HHV (or 0)"></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
 
     <div class="grid-cell bg-pink left-align">Lower Heating Value</div>
     <div class="grid-cell bg-pink">LHV</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_lhv2" class="inner-input" placeholder="Enter LHV (or 0 if use HHV)"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_lhv2" class="inner-input" oninput="validateLive2()" placeholder="Enter LHV (or 0)"></div>
     <div class="grid-cell bg-pink">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Moisture</div>
     <div class="grid-cell bg-blue">M</div>
-    <div class="grid-cell bg-white-box">
-      <input type="number" id="in_moisture2" class="inner-input" oninput="validateLive()" placeholder="Enter value ...">
-    </div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_moisture2" class="inner-input" oninput="validateLive2()" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">%wt</div>
 
-<div id="output-section" style="display: none !important;">
-    <div id="status-display" style="text-align: center; background: #f0faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d0e8ff;">
-      <h4 style="color: #28a745; margin: 0;">Status: Calculation Completed (See figures in the image)</h4>
+    <div class="grid-cell bg-blue left-align">Excess Air Ratio</div>
+    <div class="grid-cell bg-blue">E</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_excess_air2" class="inner-input" oninput="validateLive2()" placeholder="Max 1.0"></div>
+    <div class="grid-cell bg-blue"></div>
+  </div>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <button type="button" class="btn-calc" onclick="runExhaustCalc()" style="width: 100%; max-width: 400px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate Exhaust Gas</button>
+  </div>
+
+  <div id="output-section2" style="display: none !important;">
+    <div id="status-display2" style="text-align: center; background: #f0faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d0e8ff;">
+      <h5 style="color: #28a745; margin: 0;">Status: Calculation Completed</h5>
     </div>
 
     <div class="grid-table">
-      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Mass of air required for combustion</div>
-      <div class="grid-cell bg-yellow left-align">Total Air required</div>
-      <div class="grid-cell bg-yellow">ṁ<sub>air</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="res_ma" class="inner-input" readonly></div>
-      <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
-
-      <div class="grid-cell bg-yellow left-align">Primary Air Mass</div>
-      <div class="grid-cell bg-yellow">ṁ<sub>1</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="res_map" class="inner-input" readonly></div>
-      <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
-
-      <div class="grid-cell bg-yellow left-align">Secondary Air Mass</div>
-      <div class="grid-cell bg-yellow">ṁ<sub>2</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="res_mas" class="inner-input" readonly></div>
-      <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
-    </div>
-
-    <div style="text-align: center; margin-top: 30px;">
-      <div style="position: relative; display: inline-block;">
-        <img src="image/Airflow (2).png" style="width: 100%; max-width: 550px; height: auto; display: block;">
-        <div id="box-val-sec" class="img-overlay" style="top: 35%; left: 86%;">0.00</div>
-        <div id="box-val-pri" class="img-overlay" style="top: 71%; left: 89%;">0.00</div>
-      </div>
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Exhaust Gas Results</div>
+      <div class="grid-cell bg-yellow left-align">Exhaust Gas Generation</div>
+      <div class="grid-cell bg-yellow">V̇<sub>gas</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_vg" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">Nm³/hr</div>
     </div>
   </div>
 </div>
 
 <script>
-  function validateLive() {
+function validateLive2() {
     const mInput = document.getElementById('in_moisture2');
+    const eInput = document.getElementById('in_excess_air2');
+    const hhvInput = document.getElementById('in_hhv2');
+    const lhvInput = document.getElementById('in_lhv2');
 
     const mVal = parseFloat(mInput.value) || 0;
     const eVal = parseFloat(eInput.value) || 0;
-    const paVal = parseFloat(paInput.value) || 0;
-    const saVal = parseFloat(saInput.value) || 0;
 
-    // Moisture ไม่เกิน 100
-    mInput.style.color = (mVal > 100 || mVal < 0) ? "red" : (mVal > 0 ? "green" : "");
-
-    // Excess Air ไม่เกิน 1
-    eInput.style.color = eVal > 1 ? "red" : (eVal > 0 ? "green" : "");
-
-    // PA + SA ต้องครบ 100
-    const isCorrectSum = (paVal + saVal === 100);
-    paInput.style.color = isCorrectSum ? "green" : "red";
-    saInput.style.color = isCorrectSum ? "green" : "red";
+    // เปลี่ยนสีตามเงื่อนไข
+    mInput.style.color = (mVal > 100 || mVal <= 0) ? "red" : "green";
+    eInput.style.color = (eVal > 1) ? "red" : (eVal > 0 ? "green" : "");
+    hhvInput.style.color = (parseFloat(hhvInput.value) === 0) ? "#999" : "#333";
+    lhvInput.style.color = (parseFloat(lhvInput.value) === 0) ? "#999" : "#333";
 }
 
-  function runCombustionCalc() {
-    const outSection = document.getElementById('output-section');
-    const getNum = (id) => {
-        const v = document.getElementById(id).value;
-        return v === "" ? 0 : parseFloat(v);
-    };
+function runExhaustCalc() {
+    const outSection = document.getElementById('output-section2');
+    const getNum = (id) => parseFloat(document.getElementById(id).value) || 0;
 
-    const waste = getNum('in_waste');
-    const hhv   = getNum('in_hhv');
-    const lhvIn = getNum('in_lhv');
-    const m     = getNum('in_moisture');
-    const e     = getNum('in_excess_air');
-    const pa    = getNum('in_pa_ratio');
-    const sa    = getNum('in_sa_ratio');
+    const waste = getNum('in_waste2');
+    const hhv   = getNum('in_hhv2');
+    const lhvIn = getNum('in_lhv2');
+    const m     = getNum('in_moisture2');
+    const e     = getNum('in_excess_air2');
 
-    // --- ตรวจสอบเงื่อนไขพร้อม Alert ---
-    if (m > 100 || m <= 0) {
-        alert("Warning: Moisture (M) must be between 0 and 100%.");
-        return;
-    }
-    if (e > 1) {
-        alert("Warning: Excess Air Ratio (E) must not exceed 1.0.");
-        return;
-    }
-    if (pa + sa !== 100) {
-        alert("Warning: The sum of PA and SA must be 100%. (Current: " + (pa + sa) + "%)");
-        return;
-    }
+    // ตรวจสอบข้อมูลก่อนคำนวณ
+    if (m > 100 || m <= 0) { alert("Warning: Moisture must be 1-100%"); return; }
+    if (e > 1) { alert("Warning: Excess Air Ratio must not exceed 1.0"); return; }
+    if (waste <= 0) { alert("Please enter the Amount of Solid Waste."); return; }
 
-    let lhv_calc = 0;
-    if (lhvIn > 0) {
-        lhv_calc = lhvIn;
-    } else if (hhv > 0) {
-        lhv_calc = hhv - (24.42 * m);
-    } else {
-        alert("Please enter either HHV or LHV (Enter 0 in the unused field).");
-        return;
-    }
+    // คำนวณ LHV หลังบ้าน
+    let lhv_calc = (lhvIn > 0) ? lhvIn : (hhv - (24.42 * m));
 
-    const m_fuel_hr = (waste * 1000) / 24;
-    const m_dot_air = 0.33 * ((lhv_calc * 100) / (100 - m)) * (1 / 1000) * (1 + e) * m_fuel_hr;
+    // --- สูตรคำนวณ Vgas ตามกรอบสีแดง ---
+    const w_hr = (waste * 1000) / 24; // ส่วนของ (W * 1000 / 24)
     
-    const m1 = m_dot_air * (pa / 100);
-    const m2 = m_dot_air * (sa / 100);
+    // คำนวณตามโครงสร้างสูตรในรูป:
+    // Vgas = [ w_hr * (1 + (0.33 * (LHV*100/(100-M)) * (1/1000) * (1+E))) ] / 1.293
+    const term1 = 0.33 * ((lhv_calc * 100) / (100 - m)) * (1 / 1000);
+    const v_gas_total = (w_hr * (1 + (term1 * (1 + e)))) / 1.293;
 
-    document.getElementById('res_ma').value = m_dot_air.toFixed(2);
-    document.getElementById('res_map').value = m1.toFixed(2);
-    document.getElementById('res_mas').value = m2.toFixed(2);
-    document.getElementById('box-val-pri').innerText = m1.toFixed(2);
-    document.getElementById('box-val-sec').innerText = m2.toFixed(2);
+    // แสดงผลลัพธ์
+    document.getElementById('res_vg').value = v_gas_total.toFixed(2);
 
+    // แสดงส่วนผลลัพธ์
     outSection.style.setProperty('display', 'block', 'important');
     setTimeout(() => {
-        document.getElementById('status-display').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('status-display2').scrollIntoView({ behavior: 'smooth' });
     }, 100);
 }
 </script>
-        <!-- จบส่วนที่ 2 -->
+        <!-- จบส่วนที่ 2 Exhaust Gas Generation-->
 
       </div>
     </div>
