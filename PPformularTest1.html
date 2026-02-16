@@ -664,6 +664,11 @@
           <div class="img-overlay-unit">Nm³/hr</div>
       </div>
     </div>
+
+    <div style="text-align: right; margin-top: 20px;">
+      <button type="button" onclick="showPage(2)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
+    </div>
+
   </div>
 </div>
 
@@ -835,6 +840,13 @@ function runCombustionCalc() {
       <div class="grid-cell bg-white-box"><input type="text" id="res_vg" class="inner-input" readonly></div>
       <div class="grid-cell bg-yellow">Nm³/hr</div>
     </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+  <button type="button" onclick="showPage(1)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
+  
+  <button type="button" onclick="showPage(3)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
+</div>
+
   </div>
 </div>
 
@@ -988,30 +1000,16 @@ function runExhaustCalc() {
       }
     }
 
-    // --- ฟังก์ชัน 3: คำนวณ (Calculate) ---
-function calculatePage1() {
-    // 1. ดึงค่าจาก Input
-    const waste = parseFloat(document.getElementById('in_waste').value) || 0;
-    const hhv = parseFloat(document.getElementById('in_hhv').value) || 0;
-    // ... ดึงค่าอื่นๆ ตามต้องการ
-
-    // 2. ส่วนของสูตรคำนวณ (เดี๋ยวคุณมาใส่ตรงนี้)
-    let ma_result = 0; 
-    let map_result = 0;
-    let mas_result = 0;
-    // ตัวอย่าง: ma_result = waste * hhv ...
-
-    // 3. แสดงผลลัพธ์ลงในช่องสีเหลือง
-    document.getElementById('out_ma').value = ma_result.toFixed(2);
-    document.getElementById('out_map').value = map_result.toFixed(2);
-    document.getElementById('out_mas').value = mas_result.toFixed(2);
+    function showPage(pageNum) {
+    // ซ่อนทุกหน้าก่อน
+    document.getElementById('page-1').classList.remove('active');
+    document.getElementById('page-2').classList.remove('active');
     
-    // 4. แสดงผลลัพธ์บนรูปภาพ
-    document.getElementById('box-val-sec').innerText = mas_result.toFixed(2);
-    document.getElementById('box-val-pri').innerText = map_result.toFixed(2);
-
-    // 5. สั่งให้ส่วนผลลัพธ์ (ตารางเหลือง + รูป) แสดงออกมา
-    document.getElementById('output-section').style.display = 'block';
+    // แสดงเฉพาะหน้าที่เลือก
+    document.getElementById('page-' + pageNum).classList.add('active');
+    
+    // เลื่อนจอไปด้านบนสุดของหน้านั้นๆ
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
   </script>
 
