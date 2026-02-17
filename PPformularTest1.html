@@ -651,6 +651,7 @@
       <div class="grid-cell bg-yellow">Nm³/hr</div>
     </div>
 
+    <div style="text-align: center; margin-top: 30px;"></div>
     <div style="position: relative; display: inline-block;">
       <img src="image/Airflow (2).png" style="width: 100%; max-width: 550px; height: auto; display: block;">
       
@@ -830,7 +831,7 @@ function runCombustionCalc() {
 
   <div id="output-section2" style="display: none !important;">
     <div id="status-display2" style="text-align: center; background: #f0faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d0e8ff;">
-      <h5 style="color: #28a745; margin: 0;">Status: Calculation Completed</h5>
+      <h5 style="color: #28a745; margin: 0;">Status: Calculation Completed (See figures in the image)</h5>
     </div>
 
     <div class="grid-table">
@@ -840,6 +841,15 @@ function runCombustionCalc() {
       <div class="grid-cell bg-white-box"><input type="text" id="res_vg" class="inner-input" readonly></div>
       <div class="grid-cell bg-yellow">Nm³/hr</div>
     </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+    <div style="position: relative; display: inline-block;">
+      <img src="image/Exhaust Gas.png" style="width: 100%; max-width: 550px; height: auto; display: block;">
+
+    <div style="position: absolute; top: 49%; left: 2%; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <div id="box-val-sec" class="img-overlay-val">0.00</div>
+          <div class="img-overlay-unit">Nm³/hr</div>
+      </div>
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
   <button type="button" onclick="showPage(1)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
