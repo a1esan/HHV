@@ -847,7 +847,7 @@ function runCombustionCalc() {
       <img src="image/Exhaust Gas.png" style="width: 100%; max-width: 550px; height: auto; display: block;">
 
     <div style="position: absolute; top: 49%; left: 2%; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-          <div id="box-val-sec" class="img-overlay-val">0.00</div>
+          <div id="box-val-gas" class="img-overlay-val">0.00</div>
           <div class="img-overlay-unit">Nm³/hr</div>
       </div>
 
@@ -905,6 +905,9 @@ function runExhaustCalc() {
 
     // แสดงผลลัพธ์
     document.getElementById('res_vg').value = v_gas_total.toFixed(2);
+
+    // อัปเดตตัวเลขบนรูปภาพเป็นค่า "ปริมาตร" (V̇) พร้อมหน่วย
+    document.getElementById('box-val-gas').innerText = v_gas_total.toFixed(2);
 
     // แสดงส่วนผลลัพธ์
     outSection.style.setProperty('display', 'block', 'important');
