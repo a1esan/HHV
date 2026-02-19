@@ -364,7 +364,7 @@
     </div>
     <div class="input-group">
         <label>Moisture (%wt)</label>
-        <input type="number" id="input_m" class="input-box" >
+        <input type="number" id="input_m" class="input-box" oninput="validateMoisture('input_m')" placeholder="0-100%">
     </div>
 
 </div>
@@ -399,7 +399,7 @@
     <div class="new-calc-row">
     <div class="input-group">
         <label>New Moisture (%wt)</label>
-        <input type="number" id="new_m" class="input-box">
+        <input type="number" id="new_m" class="input-box" oninput="validateMoisture('new_m')" placeholder="0-100%">
     </div>
 
     <button class="btn-calculate small-btn" onclick="calculateNewHHV()">
@@ -496,6 +496,26 @@ document.addEventListener('input', function(e) {
         calculateCurrentTotal();
     }
 });
+
+function validateMoisture(id) {
+    const input = document.getElementById(id);
+    const val = parseFloat(input.value) || 0;
+
+    // เช็คค่าความชื้น
+    if (val > 100 || val < 0) {
+        // ถ้าเกิน 100 บังคับเป็นสีแดง
+        input.style.setProperty('color', '#dc3545', 'important');
+        input.style.fontWeight = 'bold';
+    } else if (val > 0) {
+        // ถ้าปกติ บังคับเป็นสีเขียว
+        input.style.setProperty('color', '#28a745', 'important');
+        input.style.fontWeight = 'bold';
+    } else {
+        // ถ้าว่างหรือเป็น 0 ให้กลับเป็นสีปกติ
+        input.style.setProperty('color', '', '');
+        input.style.fontWeight = 'normal';
+    }
+}
 
 async function startCalculation() {
     // 1. ดึงค่าจาก input ทั้งหมด
@@ -630,7 +650,7 @@ if (data.success) {
     }
  }
 // --- ฟังก์ชันคำนวณ HHV ใหม่ตามความชื้นที่เปลี่ยนไป (วางต่อท้ายสุด) ---
-function calculateNewHHV() {
+    function calculateNewHHV() {
     // 1. ดึงค่า HHV เดิม (As Received) จากการคำนวณครั้งแรก
     const hhv_old = parseFloat(document.getElementById('display_hhv').innerText);
     // 2. ดึงค่าความชื้นเดิม
@@ -638,6 +658,11 @@ function calculateNewHHV() {
     // 3. ดึงค่าความชื้นใหม่
     const m_new_percent = parseFloat(document.getElementById('new_m').value);
 
+    // เพิ่มแจ้งเตือนตรงนี้
+    if (m_new_percent > 100 || m_new_percent < 0) {
+        alert("Warning: New Moisture Content cannot exceed 100%!");
+        return;
+    }
     // ตรวจสอบความพร้อมของข้อมูล
     if (isNaN(hhv_old) || hhv_old === 0) {
         alert("Please complete the primary HHV calculation first.");
