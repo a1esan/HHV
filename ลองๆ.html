@@ -578,7 +578,7 @@
     <div class="grid-cell bg-blue left-align">Moisture</div>
     <div class="grid-cell bg-blue">M</div>
     <div class="grid-cell bg-white-box">
-      <input type="number" id="in_moisture" class="inner-input" oninput="validateLive()" placeholder="0-100%">
+      <input type="number" id="in_moisture" class="inner-input" oninput="validateLive()" placeholder="Enter value ...">
     </div>
     <div class="grid-cell bg-blue">%wt</div>
 
@@ -811,7 +811,7 @@ function runCombustionCalc() {
 
     <div class="grid-cell bg-blue left-align">Moisture</div>
     <div class="grid-cell bg-blue">M</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_moisture2" class="inner-input" oninput="validateLive2()" placeholder="0-100%"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_moisture2" class="inner-input" oninput="validateLive2()" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">%wt</div>
 
     <div class="grid-cell bg-blue left-align">Excess Air Ratio</div>
@@ -864,8 +864,6 @@ function validateLive2() {
 
     const mVal = parseFloat(mInput.value) || 0;
     const eVal = parseFloat(eInput.value) || 0;
-    const hhvVal = parseFloat(hhvInput.value) || 0;
-    const lhvVal = parseFloat(lhvInput.value) || 0;
 
     // เปลี่ยนสีตามเงื่อนไข
     mInput.style.color = (mVal > 100 || mVal <= 0) ? "red" : "green";
@@ -876,52 +874,79 @@ function validateLive2() {
 
 function runExhaustCalc() {
     const outSection = document.getElementById('output-section2');
-    const getNum = (id) => parseFloat(document.getElementById(id).value) || 0;
+    
+    // ฟังก์ชันช่วยดึงค่าจาก ID ถ้าไม่มีให้เป็น 0
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? parseFloat(el.value) || 0 : 0;
+    };
 
-    const waste = getNum('in_waste2');
-    const hhv   = getNum('in_hhv2');
-    const lhvIn = getNum('in_lhv2');
-    const m     = getNum('in_moisture2');
-    const e     = getNum('in_excess_air2');
+    // --- 1. ส่วนดึงค่าข้ามหน้า (วางไว้ต้นฟังก์ชันตามที่น้องต้องการ) ---
+    
+    // ดึงค่าปัจจุบันของหน้า 2 มาเช็คก่อน
+    let waste2 = getVal('in_waste2');
+    let hhv2   = getVal('in_hhv2');
+    let lhv2   = getVal('in_lhv2');
+    let m2     = getVal('in_moisture2');
+    let e2     = getVal('in_excess_air2');
 
-    // ตรวจสอบข้อมูลก่อนคำนวณ
-    if (m > 100 || m <= 0) { alert("Warning: Moisture must be 1-100%"); return; }
-    if (e > 1) { alert("Warning: Excess Air Ratio must not exceed 1.0"); return; }
-    if (waste <= 0) { alert("Please enter the Amount of Solid Waste."); return; }
+    // ดึงค่าจากหน้า 1 มาเตรียมไว้
+    const waste1 = getVal('in_waste');
+    const hhv1   = getVal('in_hhv');
+    const lhv1   = getVal('in_lhv');
+    const m1     = getVal('in_moisture');
+    const e1     = getVal('in_excess_air');
 
-    // 3. จัดการค่าความร้อน (Back-end Hidden Calculation)
-    let lhv_calc = 0;
-    if (lhvIn > 0) {
-        // ใช้ LHV ที่ผู้ใช้กรอก
-        lhv_calc = lhvIn;
-    } else if (hhv > 0) {
-        // แปลง HHV เป็น LHV เงียบๆ หลังบ้าน (ไม่แสดงผลในช่อง input)
-        // สูตร: LHV = HHV - (24.42 * M)
-        lhv_calc = hhv - (24.42 * m);
-    } else {
-        alert("Please enter either HHV or LHV (Enter 0 in the unused field).");
-        return;
+    // LOGIC: ถ้าหน้า 2 ยังไม่ได้กรอก (Waste เป็น 0) แต่หน้า 1 มีข้อมูล ให้ดึงมาใส่ทันที
+    if (waste2 === 0 && waste1 > 0) {
+        document.getElementById('in_waste2').value = waste1;
+        document.getElementById('in_hhv2').value = hhv1;
+        document.getElementById('in_lhv2').value = lhv1;
+        document.getElementById('in_moisture2').value = m1;
+        document.getElementById('in_excess_air2').value = e1;
+
+        // อัปเดตตัวแปรที่จะใช้คำนวณต่อให้เป็นค่าที่ดึงมา
+        waste2 = waste1; hhv2 = hhv1; lhv2 = lhv1; m2 = m1; e2 = e1;
+        console.log("Data linked from Page 1 successfully!");
     }
 
-    // คำนวณมวลอากาศ (Mass Flow - ṁ)
-    const m_fuel_hr = (waste * 1000) / 24; 
-    
-    // คำนวณตามโครงสร้างสูตรในรูป:
-    // Vgas = [ w_hr * (1 + (0.33 * (LHV*100/(100-M)) * (1/1000) * (1+E))) ] / 1.293
-    const m_dot_air = 0.85 * (lhv_calc / 1000) * (1 + e) * m_fuel_hr;
-    const m_gas = m_fuel_hr + m_dot_air;
-    const v_gas_total = m_gas / 1.3;
+    // --- 2. การตรวจสอบเงื่อนไข (Validation) ---
+    if (waste2 <= 0) {
+        alert("Please enter Amount of Waste or calculate Page 1 first.");
+        return;
+    }
+    if (m2 > 100 || m2 <= 0) { alert("Warning: Moisture must be 1-100%"); return; }
 
-    // แสดงผลลัพธ์
+    // --- 3. ส่วนการคำนวณ (ยึดตามไฟล์ PDF หน้า 2) ---
+    
+    // แปลงขยะเป็นรายชั่วโมง (kg/hr)
+    const w_hr = (waste2 * 1000) / 24; 
+
+    // จัดการค่าความร้อน LHV
+    let lhv_calc = (lhv2 > 0) ? lhv2 : (hhv2 - (24.42 * m2));
+
+    // คำนวณมวลอากาศ (M_air) ตามสูตรสัมประสิทธิ์ 0.85 ในหน้า 1
+    // สูตร: 0.85 * (LHV/1000) * (1+E) * W_hr
+    const m_dot_air = 0.85 * (lhv_calc / 1000) * (1 + e2) * w_hr;
+
+    // คำนวณปริมาตรก๊าซไอเสีย (Vgas) ตามหลัก Mass Balance ใน PDF
+    // Vgas = (มวลขยะ + มวลอากาศ) / ความหนาแน่น 1.293
+    const v_gas_total = (w_hr + m_dot_air) / 1.293;
+
+    // --- 4. การแสดงผลลัพธ์ ---
+    
+    // ใส่ค่าในช่อง Input ผลลัพธ์
     document.getElementById('res_vg').value = v_gas_total.toFixed(2);
 
-    // อัปเดตตัวเลขบนรูปภาพเป็นค่า "ปริมาตร" (V̇) พร้อมหน่วย
-    document.getElementById('box-val-gas').innerText = v_gas_total.toFixed(2);
+    // อัปเดตตัวเลขบนรูปภาพ
+    const boxImg = document.getElementById('box-val-gas');
+    if (boxImg) boxImg.innerText = v_gas_total.toFixed(2);
 
-    // แสดงส่วนผลลัพธ์
+    // แสดงส่วนแสดงผลและเลื่อนหน้าจอ
     outSection.style.setProperty('display', 'block', 'important');
     setTimeout(() => {
-        document.getElementById('status-display2').scrollIntoView({ behavior: 'smooth' });
+        const status2 = document.getElementById('status-display2');
+        if (status2) status2.scrollIntoView({ behavior: 'smooth' });
     }, 100);
 }
 </script>
@@ -952,16 +977,6 @@ function runExhaustCalc() {
     <div class="grid-cell bg-pink">LHV</div>
     <div class="grid-cell bg-white-box"><input type="number" id="in_lhv3" class="inner-input" oninput="validateLive3()" placeholder="Enter LHV (or 0 if use HHV)"></div>
     <div class="grid-cell bg-pink">kJ/kg</div>
-
-    <div class="grid-cell bg-blue left-align">Moisture</div>
-    <div class="grid-cell bg-blue">M</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_moisture3" class="inner-input" oninput="validateLive3()" placeholder="0-100%"></div>
-    <div class="grid-cell bg-blue">%wt</div>
-
-    <div class="grid-cell bg-blue left-align">Excess Air Ratio</div>
-    <div class="grid-cell bg-blue">E</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_excess_air3" class="inner-input" oninput="validateLive3()" placeholder="Max 1.0"></div>
-    <div class="grid-cell bg-blue"></div>
   </div>
 
   <div style="text-align: center; margin: 30px 0;">
@@ -978,7 +993,18 @@ function runExhaustCalc() {
       <div class="grid-cell bg-yellow left-align">Heat Energy from Fuel</div>
       <div class="grid-cell bg-yellow">Q̇<sub>fuel</sub></div>
       <div class="grid-cell bg-white-box"><input type="text" id="Q_fuel" class="inner-input" readonly></div>
-      <div class="grid-cell bg-yellow">kJ/hr</div>
+      <div class="grid-cell bg-yellow">kJ/day</div>
+
+      <div class="grid-cell bg-yellow left-align">Heat Energy from Air</div>
+      <div class="grid-cell bg-yellow">Q̇<sub>air</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="Q_air" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">kJ/day</div>
+
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Thermal Energy Output</div>
+      <div class="grid-cell bg-yellow left-align">Heat Loss through Flue Gas</div>
+      <div class="grid-cell bg-yellow">Q̇<sub>gas</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="Q_gas" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">kJ/day</div>
 
       <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Combustion Temperature</div>
       <div class="grid-cell bg-yellow left-align">Combustion Temperature</div>
@@ -993,7 +1019,7 @@ function runExhaustCalc() {
 
     <div style="position: absolute; top: 49%; left: 2%; display: flex; flex-direction: column; align-items: center; gap: 4px;">
       <div id="box-val-gas3" class="img-overlay-val">0.00</div>
-      <div class="img-overlay-unit">°C</div>
+      <div class="img-overlay-unit">Nm³/hr</div>
     </div>
   </div>
 </div>
@@ -1007,68 +1033,26 @@ function runExhaustCalc() {
 
 
 <script>
-function validateLive3() {
-    const mInput = document.getElementById('in_moisture3');
-    const eInput = document.getElementById('in_excess_air3');
-    const hhvInput = document.getElementById('in_hhv3');
-    const lhvInput = document.getElementById('in_lhv3');
-
-    const mVal = parseFloat(mInput.value) || 0;
-    const eVal = parseFloat(eInput.value) || 0;
-    const hhvVal = parseFloat(hhvInput.value) || 0;
-    const lhvVal = parseFloat(lhvInput.value) || 0;
-
-    // เปลี่ยนสีตามเงื่อนไข
-    mInput.style.color = (mVal > 100 || mVal <= 0) ? "red" : "green";
-    eInput.style.color = (eVal > 1) ? "red" : (eVal > 0 ? "green" : "");
-    hhvInput.style.color = (parseFloat(hhvInput.value) === 0) ? "#999" : "#333";
-    lhvInput.style.color = (parseFloat(lhvInput.value) === 0) ? "#999" : "#333";
+function runTempCalc() {
+    const waste = parseFloat(document.getElementById('in_waste3').value) || 0;
+    if (waste <= 0) { alert("Please enter amount of waste"); return; }
+    
+    // สั่งโชว์ผลลัพธ์
+    document.getElementById('output-section3').style.display = 'block';
+    
+    // ใส่ค่าทดสอบ (อายไปแก้สูตรจริงทีหลังนะ)
+    document.getElementById('Q_fuel').value = (waste * 1000).toLocaleString();
+    document.getElementById('T_comb').value = "850.00";
+    
+    // เลื่อนหน้าจอลงมาดูผล
+    document.getElementById('output-section3').scrollIntoView({ behavior: 'smooth' });
 }
 
-function runTempCalc() {
-    // 1. ดึงค่า Input
-    const outSection = document.getElementById('output-section3');
-    const getNum = (id) => parseFloat(document.getElementById(id).value) || 0;
-    
-    const waste = getNum('in_waste3');
-    const hhv = getNum('in_hhv3');
-    const lhvIn = getNum('in_lhv3');
-    const m     = getNum('in_moisture3');
-    const e     = getNum('in_excess_air3');
-
-    // 2. ตรวจสอบข้อมูล
-    if (m > 100 || m <= 0) { alert("Warning: Moisture must be 1-100%"); return; }
-    if (e > 1) { alert("Warning: Excess Air Ratio must not exceed 1.0"); return; }
-    if (waste <= 0) { alert("Please enter the Amount of Solid Waste."); return; }
-
-    // 3. คำนวณค่าทางความร้อน (เหมือนหน้า 1-2)
-    let lhv_calc = (lhvIn > 0) ? lhvIn : (hhv - (24.42 * m));
-    const m_fuel_hr = (waste * 1000) / 24;
-    const m_dot_air = 0.85 * (lhv_calc / 1000) * (1 + e) * m_fuel_hr;
-
-    // 4. คำนวณพลังงาน (Heat Energy)
-    // Q_fuel (kJ/hr) = m_fuel * LHV
-    const q_fuel = m_fuel_hr * lhv_calc;
-    
-    // 5. คำนวณอุณหภูมิการเผาไหม้ (T_comb)
-    // สูตรจาก PDF: T_comb = (Q_fuel + Q_air) / (V_gas * rho_gas * Cp_gas)  
-    const t_comb = ((q_fuel / (1.15 * (m_fuel_hr + m_dot_air)))  + 298) - 273;
-
-    // 6. แสดงผลลัพธ์ลงในช่อง Output (แปลงหน่วยเป็นต่อ Day สำหรับ Q ตาม Label ใน HTML)
-    document.getElementById('Q_fuel').value = q_fuel.toFixed(2);
-    document.getElementById('T_comb').value = t_comb.toFixed(2);
-
-    // 7. อัปเดตตัวเลขบนรูปภาพ
-    document.getElementById('box-val-gas3').innerText = t_comb.toFixed(2);
-    // เปลี่ยนหน่วยในรูปให้ตรงกับค่าที่โชว์ (ในรูปเป็น Nm3/hr แต่ค่าที่คำนวณคือ Temp)
-    const unitLabel = document.querySelector('#page-3 .img-overlay-unit');
-    if (unitLabel) unitLabel.innerText = "°C";
-
-    // แสดงส่วนผลลัพธ์
-    document.getElementById('output-section3').style.setProperty('display', 'block', 'important');
-    setTimeout(() => {
-        document.getElementById('status-display3').scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+function validateLive3() {
+    const hhv = document.getElementById('in_hhv3');
+    const lhv = document.getElementById('in_lhv3');
+    hhv.style.color = (parseFloat(hhv.value) === 0) ? "#999" : "#333";
+    lhv.style.color = (parseFloat(lhv.value) === 0) ? "#999" : "#333";
 }
 </script>
       <!-- จบส่วนที่ 3  Combustion Temperature -->
@@ -1086,48 +1070,38 @@ function runTempCalc() {
 
     <div class="grid-cell bg-blue left-align">Boiler Efficiency</div>
     <div class="grid-cell bg-blue">ƞ<sub>boiler</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="eff" class="inner-input" oninput="validateLive4()" placeholder="0-100%"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="eff" class="inner-input" oninput="validateLive4()" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">%</div>
     
     <div class="grid-cell bg-blue left-align">Exhaust Gas Temperature&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
     <div class="grid-cell bg-blue">T<sub>gas, out</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="T_gas_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="T_gasout" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">°C</div>
 
     <div class="grid-cell bg-blue left-align">Inlet water Temperature&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
     <div class="grid-cell bg-blue">T<sub>w, in</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="T_w_in" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="T_win" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">°C</div>
 
     <div class="grid-cell bg-blue left-align">Steam Outlet Temperature&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
     <div class="grid-cell bg-blue">T<sub>w, out</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="T_w_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="T_wout" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">°C</div>
 
     <div class="grid-cell bg-blue left-align">Steam Outlet Pressure&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
     <div class="grid-cell bg-blue">P<sub>w, out</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="P_w_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="P_wout" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">MPa</div>
 
     <div class="grid-cell bg-blue left-align">Feedwater Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
     <div class="grid-cell bg-blue">h<sub>w, in</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="h_w_in" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_win" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Exhaust Steam Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
     <div class="grid-cell bg-blue">h<sub>w, out</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="h_w_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_wout" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
-
-    <div class="grid-cell bg-blue left-align">Exhaust Gas Generation</div>
-    <div class="grid-cell bg-blue">V̇<sub>gas</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="res_vg4" class="inner-input" placeholder="Enter value ..."></div>
-    <div class="grid-cell bg-blue">Nm³/hr</div>
-    
-    <div class="grid-cell bg-blue left-align">Combustion Temperature</div>
-    <div class="grid-cell bg-blue">T<sub>comb</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="T_comb4" class="inner-input" placeholder="Enter value ..."></div>
-    <div class="grid-cell bg-blue">°C</div>
   </div>
 
   <div style="text-align: center; margin: 30px 0;">
@@ -1149,7 +1123,7 @@ function runTempCalc() {
       <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Water Tube Steam Generation</div>
       <div class="grid-cell bg-yellow left-align">Steam Flow Rate</div>
       <div class="grid-cell bg-yellow">ṁ<sub>w</sub></div>
-      <div class="grid-cell bg-white-box"><input type="text" id="m_w4" class="inner-input" readonly></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="m_w" class="inner-input" readonly></div>
       <div class="grid-cell bg-yellow">ton/hr</div>
     </div>
 
@@ -1173,64 +1147,16 @@ function runTempCalc() {
 
 
 <script>
-function validateLive4() {
-    const eff = document.getElementById('eff');
-    const TgasOut = document.getElementById('T_gas_out');
-    const TwaterIn = document.getElementById('T_w_in');
-    const TwaterOut = document.getElementById('T_w_out');
-    const PwaterOut = document.getElementById('P_w_out');
-    const Feedwater = document.getElementById('h_w_in');
-    const Exhaust4 = document.getElementById('h_w_out');
-    const res_vg4 = document.getElementById('res_vg4');
-    const T_comb4 = document.getElementById('T_comb4');
-
-    const effVal = parseFloat(eff.value) || 0;
-    const TgasOutVal = parseFloat(TgasOut.value) || 0;
-    const TwaterInVal = parseFloat(TwaterIn.value) || 0;
-    const TwaterOutVal = parseFloat(TwaterOut.value) || 0;
-    const PwaterOutVal = parseFloat(PwaterOut.value) || 0;
-    const FeedwaterVal = parseFloat(Feedwater.value) || 0;
-    const Exhaust4Val = parseFloat(Exhaust4.value) || 0;
-    const res_vg4Val = parseFloat(res_vg4.value) || 0;
-    const T_comb4Val = parseFloat(T_comb4.value) || 0;
-
-    // เปลี่ยนสีตามเงื่อนไข
-    eff.style.color = (effVal > 100 || effVal <= 0) ? "red" : "green";
-}
-
 function runSteamCalc() {
-    // 1. ดึงค่า Input
-    const outSection = document.getElementById('output-section4');
-    const getNum = (id) => parseFloat(document.getElementById(id).value) || 0;
+    const eff = parseFloat(document.getElementById('eff').value) || 0;
+    if (eff <= 0) { alert("Please enter amount of waste"); return; }
     
-    const eff = getNum('eff');
-    const TgasOut = getNum('T_gas_out');
-    const TwaterIn = getNum('T_w_in');
-    const TwaterOut = getNum('T_w_out');
-    const PwaterOut = getNum('P_w_out');
-    const Feedwater = getNum('h_w_in');
-    const Exhaust4 = getNum('h_w_out');
-    const res_vg4 = getNum('res_vg4');
-    const T_comb4 = getNum('T_comb4');
-
-    // 2. ตรวจสอบข้อมูล
-    if (eff > 100 || eff <= 0) { alert("Warning: Moisture must be 1-100%"); return; }
-
-    // ถ้าลืมกรอกข้อมูลให้เตือน (เพิ่มให้ครบทุกช่อง)
-    if(!eff || !TgasOut || !TwaterIn || !TwaterOut || !PwaterOut || !Feedwater || !Exhaust4 || !res_vg4 || !T_comb4) {
-        alert("Please fill in all fields.");
-        return;
-    }
-
-    // 3. คำนวณ
-    const Q_dot_gas_out = res_vg4 * 1.15 * (T_comb4 -TgasOut) * (eff/100);
-    const m_dot_w = (Q_dot_gas_out / (Exhaust4 - Feedwater))/1000;
-
     // สั่งโชว์ผลลัพธ์
     document.getElementById('output-section4').style.display = 'block';
     
-    document.getElementById('Q_gasout').value = Q_dot_gas_out.toFixed(2);
-    document.getElementById('m_w4').value = m_dot_w.toFixed(2);
+    // ใส่ค่าทดสอบ (อายไปแก้สูตรจริงทีหลังนะ)
+    document.getElementById('Q_gasout').value = (eff * 1000).toLocaleString();
+    document.getElementById('m_w').value = "850.00";
     
     // เลื่อนหน้าจอลงมาดูผล
     document.getElementById('output-section4').scrollIntoView({ behavior: 'smooth' });
@@ -1267,7 +1193,7 @@ function runSteamCalc() {
 
     <div class="grid-cell bg-blue left-align">Generator Power Factor&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
     <div class="grid-cell bg-blue">P.F.</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="PF" class="inner-input" oninput="validateLive5()" placeholder="Max 1.0"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="PF" class="inner-input" oninput="validateLive5()" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue"></div>
 
     <div class="grid-cell bg-blue left-align">Inlet Steam Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
@@ -1279,11 +1205,6 @@ function runSteamCalc() {
     <div class="grid-cell bg-blue">h<sub>out</sub></div>
     <div class="grid-cell bg-white-box"><input type="number" id="h_out" class="inner-input" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
-
-    <div class="grid-cell bg-blue left-align">Steam Flow Rate</div>
-    <div class="grid-cell bg-blue">ṁ<sub>w</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="m_w5" class="inner-input" placeholder="Enter value ..."></div>
-    <div class="grid-cell bg-blue">ton/hr</div>
   </div>
 
   <div style="text-align: center; margin: 30px 0;">
@@ -1296,6 +1217,12 @@ function runSteamCalc() {
     </div>
 
     <div class="grid-table">
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Turbine Performance</div>
+      <div class="grid-cell bg-yellow left-align">Steam Generation Rate</div>
+      <div class="grid-cell bg-yellow">ṁ<sub>w</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="m_w5" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">ton/hr</div>
+
       <div class="grid-cell bg-yellow left-align">Turbine Work Output</div>
       <div class="grid-cell bg-yellow">Ẇ<sub>out, turbine</sub></div>
       <div class="grid-cell bg-white-box"><input type="text" id="w_turbine" class="inner-input" readonly></div>
@@ -1328,64 +1255,21 @@ function runSteamCalc() {
 
 
 <script>
-function validateLive5() {
-    // ต้องอ้างอิงถึง Element ให้ถูกตัว
-    const PFInput = document.getElementById('PF');
-    const PFVal = parseFloat(PFInput.value) || 0;
-
-    // เปลี่ยนสีตามเงื่อนไข
-    PFInput.style.color = (PFVal > 1) ? "red" : (PFVal > 0 ? "green" : "");
-}
-
 function runTurbineCalc() {
-    // 1. ดึงค่า Input
-    const getNum = (id) => parseFloat(document.getElementById(id).value) || 0;
+    const T_in = parseFloat(document.getElementById('T_in').value) || 0;
+    if (T_in <= 0) { alert("Please enter amount of waste"); return; }
     
-    // ดึงค่ามาเก็บไว้ในตัวแปร (ตัดคำว่า Input ออกเพื่อให้สอดคล้องกับตอนเช็คเงื่อนไขข้างล่าง)
-    const T_in = getNum('T_in');
-    const P_in = getNum('P_in');
-    const P_out = getNum('P_out');
-    const PF = getNum('PF');
-    const h_in = getNum('h_in');
-    const h_out = getNum('h_out');
-    const m_w5 = getNum('m_w5'); // แก้จาก m_w5t เป็น m_w5 ให้ตรงกับ ID ใน HTML
-
-    // 2. ตรวจสอบข้อมูล
-    // เช็คค่าว่างของ PF ก่อนตามที่ต้องการ
-    if (document.getElementById('PF').value.trim() === "") {
-        alert("Please enter Generator Power Factor");
-        return;
-    }
-
-    if (PF > 1) { 
-        alert("Warning: Power Factor must not exceed 1.0"); 
-        return; 
-    }
-
-    // ถ้าลืมกรอกข้อมูลให้เตือน (เช็คจากตัวแปรที่ดึงมา)
-    if(!T_in || !P_in || !P_out || !PF || !h_in || !h_out || !m_w5) {
-        alert("Please fill in all fields.");
-        return;
-    }
-
-    // 3. คำนวณ (ใช้ชื่อตัวแปรให้ตรงกับที่ประกาศไว้ข้างบน)
-    // สูตร: MW = (ton/hr * kJ/kg) / 3600
-    const m_dot_out_t = (m_w5 * (h_in - h_out)) / 3600;
-    const m_dot_out_g = m_dot_out_t * PF;
-
-    // 4. แสดงผลลัพธ์
-    document.getElementById('output-section5').style.setProperty('display', 'block', 'important');
+    // สั่งโชว์ผลลัพธ์
+    document.getElementById('output-section5').style.display = 'block';
     
-    document.getElementById('w_turbine').value = m_dot_out_t.toFixed(2);
-    document.getElementById('w_gen').value = m_dot_out_g.toFixed(2);
-    
-    // อัปเดตตัวเลขในรูปภาพด้วย
-    document.getElementById('box-val-turbine').innerText = m_dot_out_g.toFixed(2);
+    // ใส่ค่าทดสอบ (อายไปแก้สูตรจริงทีหลังนะ)
+    document.getElementById('m_w5').value = (T_in * 1000).toLocaleString();
+    document.getElementById('w_turbine').value = "850.00";
     
     // เลื่อนหน้าจอลงมาดูผล
     document.getElementById('output-section5').scrollIntoView({ behavior: 'smooth' });
 }
-</script>
+
 </script>
       <!-- จบส่วนที่ 5  Steam Generation Rate -->
     </div>
